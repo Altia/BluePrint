@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Altia BluePrint (ABP) is a declarative language for describing human–machine interfaces.">
+<link rel="icon" href="assets/altia-mark.png">
+<title>Altia BluePrint</title>
+<style>
+/* Layout: same Altia look as the language reference -- dark Altia top bar, one centred column. */
+:root{
+  --altia:#0B5075; --altia-deep:#073A56; --altia-ink:#062B40;
+  --teal:#1FB5A8; --teal-soft:#D9F3F0; --amber:#E0A33A;
+  --bg:#F5F8FA; --surface:#FFFFFF; --surface-2:#EEF3F6;
+  --text:#1B2833; --text-2:#4A5B68; --text-3:#6E7F8C; --rule:#D8E1E7;
+  --code-bg:#EEF3F6; --link:#0B5075; --lit:#0E7A70; --amber-ink:#8A5A00;
+  --shot-shadow:0 0 0 1px rgba(6,43,64,.10),0 2px 4px rgba(6,43,64,.08),0 18px 40px -12px rgba(6,43,64,.35);
+  --font:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --mono:"Cascadia Code","Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;
+  --bar-h:60px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0C1419; --surface:#121D24; --surface-2:#17252E;
+  --text:#E3EAEF; --text-2:#A9B8C3; --text-3:#7E909C; --rule:#243541;
+  --code-bg:#17252E; --link:#5CC6EE; --lit:#8FE3DA; --teal-soft:#0F3431; --amber-ink:#F0C46E;
+  --shot-shadow:0 0 0 1px rgba(255,255,255,.07),0 2px 4px rgba(0,0,0,.4),0 18px 40px -12px rgba(0,0,0,.7);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C1419; --surface:#121D24; --surface-2:#17252E;
+  --text:#E3EAEF; --text-2:#A9B8C3; --text-3:#7E909C; --rule:#243541;
+  --code-bg:#17252E; --link:#5CC6EE; --lit:#8FE3DA; --teal-soft:#0F3431; --amber-ink:#F0C46E;
+  --shot-shadow:0 0 0 1px rgba(255,255,255,.07),0 2px 4px rgba(0,0,0,.4),0 18px 40px -12px rgba(0,0,0,.7);
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 var(--font);-webkit-font-smoothing:antialiased}
+a{color:var(--link);text-underline-offset:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:4px}
+p,ul{margin:0 0 1em}
+ul{padding-left:1.3em}
+li{margin:.25em 0}
+h1,h2,h3{line-height:1.2;color:var(--text);text-wrap:balance}
+:not(pre)>code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);padding:.1em .35em;border-radius:4px;white-space:nowrap}
+
+/* ---- top bar ---- */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--altia-deep);color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}
+.bar .in{height:var(--bar-h);max-width:72rem;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:16px}
+.bar .logo{height:26px;width:auto;filter:brightness(0) invert(1)}
+.bar .sep{width:1px;height:22px;background:rgba(255,255,255,.25)}
+.bar .prod{font-weight:600;letter-spacing:.01em;white-space:nowrap}
+.bar .sp{flex:1}
+.bar a.nav{color:#fff;text-decoration:none;font-size:13px;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:4px 10px;white-space:nowrap}
+.bar a.nav:hover{background:rgba(255,255,255,.1)}
+.pill{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:999px;background:var(--teal);color:#042A27;white-space:nowrap}
+.theme-btn{background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:6px;padding:4px 10px;font:13px var(--font);cursor:pointer}
+.theme-btn:hover{background:rgba(255,255,255,.1)}
+
+/* ---- hero ---- */
+.hero{background:linear-gradient(160deg,var(--altia-deep) 0%,var(--altia) 100%);color:#fff}
+.hero .in{max-width:72rem;margin:0 auto;padding:64px 24px 72px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:48px;align-items:center}
+.hero h1{color:#fff;font-size:44px;font-weight:700;letter-spacing:-.02em;margin:0 0 16px}
+.hero h1 small{display:block;font:600 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+.hero p{font-size:19px;color:rgba(255,255,255,.85);max-width:34rem}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.btn{display:inline-block;text-decoration:none;font-weight:600;font-size:15px;padding:10px 18px;border-radius:8px;border:1px solid transparent}
+.btn.primary{background:var(--teal);color:#042A27}
+.btn.primary:hover{background:#3CC9BC}
+.btn.ghost{color:#fff;border-color:rgba(255,255,255,.4)}
+.btn.ghost:hover{background:rgba(255,255,255,.1)}
+.btn[aria-disabled="true"]{opacity:.6;pointer-events:none}
+
+pre{margin:0;background:#1E1E1E;color:#D4D4D4;border-radius:12px;padding:34px 18px 16px;overflow-x:auto;font:13.5px/1.55 var(--mono);font-variant-ligatures:none;tab-size:2;position:relative;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 24px 48px -16px rgba(0,0,0,.55)}
+pre::before{content:attr(data-lang);position:absolute;top:10px;left:18px;font:12px var(--font);color:#8B8B8B}
+pre code{font:inherit;white-space:pre}
+.tk-type{color:#4EC9B0}.tk-name{color:#DCDCAA}.tk-prop{color:#9CDCFE}.tk-str{color:#CE9178}
+.tk-num{color:#B5CEA8}.tk-com{color:#6A9955;font-style:italic}.tk-enum{color:#4FC1FF}
+.tk-event{color:#C586C0}.tk-def{color:#DCDCAA}
+
+/* ---- sections ---- */
+.wrap{max-width:72rem;margin:0 auto;padding:0 24px}
+section.band{padding:56px 0 8px}
+section.band h2{font-size:26px;font-weight:700;letter-spacing:-.01em;margin:0 0 8px}
+section.band .sub{color:var(--text-2);font-size:17px;max-width:44rem;margin-bottom:28px}
+
+.features{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.feature{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:20px 22px}
+.feature h3{font-size:16px;font-weight:600;margin:0 0 6px}
+.feature p{color:var(--text-2);font-size:15px;margin:0}
+.feature .k{display:block;font:600 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:22px;text-decoration:none;color:var(--text);transition:border-color .15s ease}
+a.card:hover{border-color:var(--teal)}
+.card h3{font-size:18px;font-weight:600;margin:0 0 6px}
+.card p{color:var(--text-2);font-size:15px;margin:0 0 14px;flex:1}
+.card .go{font-weight:600;font-size:14px;color:var(--link)}
+.card.soon{border-style:dashed}
+.card.soon .go{color:var(--text-3)}
+.status{display:inline-block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;border-radius:999px;padding:1px 9px;white-space:nowrap;vertical-align:2px;margin-left:6px;background:color-mix(in srgb,var(--amber) 22%,transparent);color:var(--amber-ink)}
+
+footer.end{max-width:72rem;margin:64px auto 0;padding:24px 24px 40px;border-top:1px solid var(--rule);color:var(--text-3);font-size:14px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+footer.end img{height:20px;width:auto;margin-top:2px}
+footer.end p{margin:0;flex:1;min-width:16rem}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) footer.end img{filter:brightness(0) invert(.85)}}
+:root[data-theme="dark"] footer.end img{filter:brightness(0) invert(.85)}
+
+@media (max-width:900px){
+  .hero .in{grid-template-columns:minmax(0,1fr);gap:36px;padding:48px 16px 56px}
+  .features,.cards{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:760px){
+  .bar .in,.wrap{padding:0 16px}
+  .bar .sep,.bar .pill{display:none}
+  .hero h1{font-size:34px}
+  .hero p{font-size:17px}
+  footer.end{padding-inline:16px}
+}
+@media (max-width:440px){.bar .in{gap:10px}.bar .long{display:none}}
+@media (prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="in">
+    <img class="logo" src="assets/altia-logo.png" alt="Altia">
+    <div class="sep"></div>
+    <div class="prod">BluePrint</div>
+    <div class="sp"></div>
+    <a class="nav" href="language-reference.html"><span class="long">Language </span>Reference</a>
+    <span class="pill">Beta</span>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle light or dark page theme">Theme</button>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="in">
+    <div>
+      <h1><small>Altia BluePrint · ABP</small>Describe the interface. The screen follows.</h1>
+      <p>BluePrint is a declarative language for human–machine interfaces. A design is a tree of components with reactive properties, events and actions. It is written in a restricted YAML, with expressions in a subset of JavaScript.</p>
+      <div class="cta">
+        <a class="btn primary" href="language-reference.html">Read the language reference</a>
+        <!-- MARKETPLACE: when the extension is published, replace this span with
+             <a class="btn ghost" href="https://marketplace.visualstudio.com/items?itemName=...">Get the VS Code extension</a> -->
+        <span class="btn ghost" aria-disabled="true">VS Code extension · coming soon</span>
+      </div>
+    </div>
+    <pre data-lang="abp"><code><span class="tk-type">Component</span>: <span class="tk-def">$PrimaryButton</span>
+  <span class="tk-prop">labelText</span>: <span class="tk-str">""</span>
+  <span class="tk-prop">tone</span>: <span class="tk-str">"#333344"</span>
+  <span class="tk-event">@press</span>:
+    <span class="tk-prop">code</span>: tone = <span class="tk-str">"#5566AA"</span>
+  <span class="tk-event">@release</span>:
+    <span class="tk-prop">code</span>: tone = <span class="tk-str">"#333344"</span>
+  <span class="tk-type">Shape</span>: <span class="tk-name">face</span>
+    <span class="tk-prop">kind</span>: <span class="tk-enum">ShapeType::Rect</span>
+    <span class="tk-prop">points</span>: [[<span class="tk-num">0</span>, <span class="tk-num">0</span>], [<span class="tk-num">160</span>, <span class="tk-num">48</span>]]
+    <span class="tk-prop">bg</span>: tone
+    <span class="tk-prop">fg</span>: tone
+  <span class="tk-type">Text</span>: <span class="tk-name">lbl</span>
+    <span class="tk-prop">text</span>: labelText
+    <span class="tk-prop">justify</span>: <span class="tk-enum">Justify::Center</span>
+    <span class="tk-prop">width</span>: <span class="tk-num">160</span>
+    <span class="tk-prop">y</span>: <span class="tk-num">8</span>
+
+<span class="tk-type">PrimaryButton</span>: <span class="tk-name">okButton</span>
+  <span class="tk-prop">labelText</span>: <span class="tk-str">"OK"</span>
+  <span class="tk-prop">x</span>: <span class="tk-num">100</span>
+  <span class="tk-prop">y</span>: <span class="tk-num">60</span></code></pre>
+  </div>
+</div>
+
+<main>
+  <section class="band" aria-labelledby="overview">
+    <div class="wrap">
+      <h2 id="overview">Overview</h2>
+      <p class="sub">A BluePrint document says what the interface is, not how to update it. When data that a property reads changes, the property is re-evaluated and the screen updates. Nobody writes the update code.</p>
+      <div class="features">
+        <div class="feature"><span class="k">Components</span><h3>A tree of typed components</h3><p>Displays, text, images, shapes and groups nest by indentation. Define your own types with <code>Base: $Name</code> and reuse them across modules.</p></div>
+        <div class="feature"><span class="k">Reactive</span><h3>Properties are expressions</h3><p>Every value is an expression. Bind a needle's rotation to <code>Vehicle.rpm</code> and it follows the data with no handler code.</p></div>
+        <div class="feature"><span class="k">Events</span><h3>Events and actions</h3><p>Handlers such as <code>@press</code>, <code>@init</code> and <code>@tick</code> run actions: set values, start motions, call the host.</p></div>
+        <div class="feature"><span class="k">Visuals</span><h3>Layout, motion and materials</h3><p>Layout, animation and custom GPU materials written in GLSL are part of the language, not add-ons.</p></div>
+        <div class="feature"><span class="k">3D</span><h3>Scenes</h3><p>Place 3D scenes in a 2D design and drive their baked animations from expressions.</p></div>
+        <div class="feature"><span class="k">Host</span><h3>A clean host boundary</h3><p>I/O and heavy computation stay in the host application. The host reaches the design through <code>Data</code> objects and external functions.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" aria-labelledby="start">
+    <div class="wrap">
+      <h2 id="start">Get started</h2>
+      <p class="sub">The language reference is the full specification. Tooling and examples will be added here as they are published.</p>
+      <div class="cards">
+        <a class="card" href="language-reference.html">
+          <h3>Language Reference</h3>
+          <p>Every construct of ABP: syntax, evaluation, events, the built-in types, host integration, diagnostics and recipes.</p>
+          <span class="go">Read the reference →</span>
+        </a>
+        <!-- MARKETPLACE: when the extension is published, turn this div into
+             <a class="card" href="https://marketplace.visualstudio.com/items?itemName=...">, drop the "soon" class
+             and the status badge, and change the link text to "Install from Marketplace →". -->
+        <div class="card soon">
+          <h3>VS Code Extension<span class="status">Coming soon</span></h3>
+          <p>Edit, check and preview BluePrint designs in Visual Studio Code. Coming to the Visual Studio Marketplace at the end of October 2026.</p>
+          <span class="go">Not yet available</span>
+        </div>
+        <a class="card" href="https://github.com/Altia/BluePrint/tree/main/demos">
+          <h3>Demos</h3>
+          <p>Example <code>.abp</code> designs, licensed under MIT, that you can copy and adapt in your own work.</p>
+          <span class="go">Browse on GitHub →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="end">
+  <img src="assets/altia-logo.png" alt="Altia">
+  <p>© 2026 Altia, Inc. Text licensed under <a href="https://creativecommons.org/licenses/by-nd/4.0/">CC BY-ND 4.0</a>; code examples under <a href="https://github.com/Altia/BluePrint/blob/main/LICENSE-CODE.txt">MIT</a>. Altia and Altia BluePrint are trademarks of Altia, Inc.</p>
+</footer>
+
+<script>
+(function(){
+  /* theme: follows the system unless the reader picks one (shared with the reference) */
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem("abp-theme"); if (saved === "light" || saved === "dark") root.setAttribute("data-theme", saved); } catch (e) {}
+  document.getElementById("themeBtn").addEventListener("click", function(){
+    var cur = root.getAttribute("data-theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    var next = cur === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("abp-theme", next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
