@@ -51,7 +51,6 @@ h1,h2,h3{line-height:1.2;color:var(--text);text-wrap:balance}
 .bar .sp{flex:1}
 .bar a.nav{color:#fff;text-decoration:none;font-size:13px;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:4px 10px;white-space:nowrap}
 .bar a.nav:hover{background:rgba(255,255,255,.1)}
-.pill{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:999px;background:var(--teal);color:#042A27;white-space:nowrap}
 .theme-btn{background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:6px;padding:4px 10px;font:13px var(--font);cursor:pointer}
 .theme-btn:hover{background:rgba(255,255,255,.1)}
 
@@ -67,7 +66,6 @@ h1,h2,h3{line-height:1.2;color:var(--text);text-wrap:balance}
 .btn.primary:hover{background:#3CC9BC}
 .btn.ghost{color:#fff;border-color:rgba(255,255,255,.4)}
 .btn.ghost:hover{background:rgba(255,255,255,.1)}
-.btn[aria-disabled="true"]{opacity:.6;pointer-events:none}
 
 pre{margin:0;background:#1E1E1E;color:#D4D4D4;border-radius:12px;padding:34px 18px 16px;overflow-x:auto;font:13.5px/1.55 var(--mono);font-variant-ligatures:none;tab-size:2;position:relative;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 24px 48px -16px rgba(0,0,0,.55)}
 pre::before{content:attr(data-lang);position:absolute;top:10px;left:18px;font:12px var(--font);color:#8B8B8B}
@@ -94,9 +92,6 @@ a.card:hover{border-color:var(--teal)}
 .card h3{font-size:18px;font-weight:600;margin:0 0 6px}
 .card p{color:var(--text-2);font-size:15px;margin:0 0 14px;flex:1}
 .card .go{font-weight:600;font-size:14px;color:var(--link)}
-.card.soon{border-style:dashed}
-.card.soon .go{color:var(--text-3)}
-.status{display:inline-block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;border-radius:999px;padding:1px 9px;white-space:nowrap;vertical-align:2px;margin-left:6px;background:color-mix(in srgb,var(--amber) 22%,transparent);color:var(--amber-ink)}
 
 footer.end{max-width:72rem;margin:64px auto 0;padding:24px 24px 40px;border-top:1px solid var(--rule);color:var(--text-3);font-size:14px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
 footer.end img{height:20px;width:auto;margin-top:2px}
@@ -110,7 +105,7 @@ footer.end p{margin:0;flex:1;min-width:16rem}
 }
 @media (max-width:760px){
   .bar .in,.wrap{padding:0 16px}
-  .bar .sep,.bar .pill{display:none}
+  .bar .sep{display:none}
   .hero h1{font-size:34px}
   .hero p{font-size:17px}
   footer.end{padding-inline:16px}
@@ -127,7 +122,6 @@ footer.end p{margin:0;flex:1;min-width:16rem}
     <div class="prod">BluePrint</div>
     <div class="sp"></div>
     <a class="nav" href="language-reference.html"><span class="long">Language </span>Reference</a>
-    <span class="pill">Beta</span>
     <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle light or dark page theme">Theme</button>
   </div>
 </header>
@@ -139,9 +133,7 @@ footer.end p{margin:0;flex:1;min-width:16rem}
       <p>BluePrint is a declarative language for human–machine interfaces. A design is a tree of components with reactive properties, events and actions. It is written in a restricted YAML, with expressions in a subset of JavaScript.</p>
       <div class="cta">
         <a class="btn primary" href="language-reference.html">Read the language reference</a>
-        <!-- MARKETPLACE: when the extension is published, replace this span with
-             <a class="btn ghost" href="https://marketplace.visualstudio.com/items?itemName=...">Get the VS Code extension</a> -->
-        <span class="btn ghost" aria-disabled="true">VS Code extension · coming soon</span>
+        <a class="btn ghost" href="https://marketplace.visualstudio.com/items?itemName=Altia.altia-blueprint">Get the VS Code extension</a>
       </div>
     </div>
     <pre data-lang="abp"><code><span class="tk-type">Component</span>: <span class="tk-def">$PrimaryButton</span>
@@ -188,21 +180,18 @@ footer.end p{margin:0;flex:1;min-width:16rem}
   <section class="band" aria-labelledby="start">
     <div class="wrap">
       <h2 id="start">Get started</h2>
-      <p class="sub">The language reference is the full specification. Tooling and examples will be added here as they are published.</p>
+      <p class="sub">The language reference is the full specification. The VS Code extension edits, checks and previews designs, and the demos give you designs to start from.</p>
       <div class="cards">
         <a class="card" href="language-reference.html">
           <h3>Language Reference</h3>
           <p>Every construct of ABP: syntax, evaluation, events, the built-in types, host integration, diagnostics and recipes.</p>
           <span class="go">Read the reference →</span>
         </a>
-        <!-- MARKETPLACE: when the extension is published, turn this div into
-             <a class="card" href="https://marketplace.visualstudio.com/items?itemName=...">, drop the "soon" class
-             and the status badge, and change the link text to "Install from Marketplace →". -->
-        <div class="card soon">
-          <h3>VS Code Extension<span class="status">Coming soon</span></h3>
-          <p>Edit, check and preview BluePrint designs in Visual Studio Code. Coming to the Visual Studio Marketplace at the end of October 2026.</p>
-          <span class="go">Not yet available</span>
-        </div>
+        <a class="card" href="https://marketplace.visualstudio.com/items?itemName=Altia.altia-blueprint">
+          <h3>VS Code Extension</h3>
+          <p>Edit, check and preview BluePrint designs in Visual Studio Code. Version 1.0.0 is on the Visual Studio Marketplace.</p>
+          <span class="go">Install from Marketplace →</span>
+        </a>
         <a class="card" href="https://github.com/Altia/BluePrint/tree/main/demos">
           <h3>Demos</h3>
           <p>Example <code>.abp</code> designs, licensed under MIT, that you can copy and adapt in your own work.</p>

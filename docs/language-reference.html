@@ -150,6 +150,9 @@ td.wrap code{white-space:normal}
 .status.reserved{background:var(--surface-2);color:var(--text-2);box-shadow:0 0 0 1px var(--rule) inset}
 .status.nd{background:color-mix(in srgb,var(--amber) 22%,transparent);color:var(--amber-ink)}
 .status.ro{background:var(--surface-2);color:var(--text-3)}
+.status.prot{background:color-mix(in srgb,var(--teal) 14%,transparent);color:var(--text-2)}
+.status.nr{background:transparent;color:var(--text-2);box-shadow:0 0 0 1px var(--text-3) inset}
+.status.intr{background:transparent;color:var(--text-3);box-shadow:0 0 0 1px var(--rule) inset}
 
 .coord{display:block;margin:0 auto 18px;max-width:100%;height:auto;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:12px}
 .coord .ln{stroke:var(--text-3);fill:none}
@@ -158,6 +161,11 @@ td.wrap code{white-space:normal}
 .coord text{fill:var(--text);font-family:var(--mono);font-size:12px}
 .coord .mut{fill:var(--text-3)}
 .coord .dot{fill:var(--teal)}
+.coord .head{fill:var(--text-3)}
+.coord .wr{stroke:var(--amber);fill:none}
+.coord .wrhead{fill:var(--amber)}
+.coord .wrt{fill:var(--amber-ink)}
+.coord .ttl{font-weight:600}
 
 .pager{display:flex;justify-content:space-between;gap:16px;margin-top:56px;padding-top:24px;border-top:1px solid var(--rule)}
 .pager a{display:flex;flex-direction:column;max-width:48%;text-decoration:none;padding:12px 16px;border:1px solid var(--rule);border-radius:12px;background:var(--surface);color:var(--text);font-weight:600}
@@ -199,7 +207,6 @@ footer.end img{height:20px;width:auto}
     <div class="prod">BluePrint Language Reference</div>
     <div class="sp"></div>
     <a class="guide-link" href="index.html">Home</a>
-    <span class="pill">Beta</span>
     <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle light or dark page theme">Theme</button>
   </div>
 </header>
@@ -229,7 +236,7 @@ footer.end img{height:20px;width:auto}
 <p>The surface syntax is YAML with three deliberate restrictions, and expressions are written in a subset of JavaScript. Drawing, layout, animation and custom GPU materials are part of the language; I/O and heavy computation are left to the host application, which reaches the design through <code>Data</code> objects and external functions.</p>
 
 <h2 id="intro.scope">Scope of this reference</h2>
-<p>This reference covers the language as implemented by the Altia BluePrint toolchain distributed with the Altia BluePrint extension, version 0.9. It describes:</p>
+<p>This reference covers the language as implemented by the Altia BluePrint toolchain distributed with the Altia BluePrint extension, version 1.0. It describes:</p>
 <ul>
   <li>the lexical and structural rules of a document (chapters <a href="#notation">1</a>–<a href="#declarations">4</a>);</li>
   <li>the expression language, name resolution and evaluation model (chapters <a href="#expressions">5</a>–<a href="#evaluation">7</a>);</li>
@@ -428,8 +435,8 @@ assets: res</code></pre>
 
 <h2 id="doc.imports">Imports and modules</h2>
 <div class="syntax"><span class="t">Syntax</span><span class="p"><span class="nt">Import</span>     <span class="op">:</span> <span class="lit">"import:"</span> <span class="lit">" "</span> <span class="nt">ImportSpec</span> EOL
-<span class="nt">ImportSpec</span> <span class="op">:</span> <span class="nt">StringLiteral</span> ( <span class="lit">" -&gt; "</span> <span class="nt">Identifier</span> )<span class="op">?</span></span></div>
-<p>A document loaded through <code>import:</code> is a <em>module</em>.</p>
+<span class="nt">ImportSpec</span> <span class="op">:</span> <span class="nt">StringLiteral</span> ( <span class="lit">" -&gt; "</span> <span class="nt">TypeName</span> )<span class="op">?</span></span></div>
+<p>A document loaded through <code>import:</code> is a <em>module</em>. Each <code>import:</code> line names one module, optionally followed by an alias; nothing but a comment may follow either (<code>import.parse</code>). The alias qualifies type names (<code>Ui::Card</code>), so it is written as a type name is: an upper-case first letter, then letters, digits and underscores.</p>
 <pre data-lang="abp"><code>import: "imports/widgets.abp" -> Ui     # aliased
 import: "imports/theme.abp"             # unaliased</code></pre>
 <p class="rule-p"><a class="rule" id="doc.import.alias" href="#doc.import.alias">doc.import.alias</a>An <strong>aliased</strong> import exposes the module's types under the alias, as qualified names: <code>Ui::Card</code>, <code>Ui::CardLabel</code>.</p>
@@ -504,7 +511,7 @@ Anim: a1</code></pre>
 <p class="rule-p"><a class="rule" id="decl.instance.form" href="#decl.instance.form">decl.instance.form</a><code>Type: name</code> creates one object of <code>Type</code> named <code>name</code>. Its body, indented one level, holds the object's properties, event handlers and children.</p>
 <p class="rule-p"><a class="rule" id="decl.instance.order" href="#decl.instance.order">decl.instance.order</a>Within a body, properties must precede child declarations. <span class="status nd">Not diagnosed</span></p>
 <p class="rule-p"><a class="rule" id="decl.instance.anon" href="#decl.instance.anon">decl.instance.anon</a>The name may be omitted. An anonymous instance cannot be referenced by name; it can be reached only through <code>this</code> and <code>parent</code>.</p>
-<p class="rule-p"><a class="rule" id="decl.instance.zorder" href="#decl.instance.zorder">decl.instance.zorder</a>Declaration order is draw order: a later sibling draws on top of an earlier one. It is also the order of items in a layout (<a href="#layout.order">§12.9</a>).</p>
+<p class="rule-p"><a class="rule" id="decl.instance.zorder" href="#decl.instance.zorder">decl.instance.zorder</a>Declaration order is draw order: a later sibling draws on top of an earlier one. It is also the order of items in a layout (<a href="#layout.order">§12.9</a>), and the order presses are offered in: the topmost object under the pointer gets the first chance (<a href="#ev.pointer.overlap">ev.pointer.overlap</a>).</p>
 <pre data-lang="abp"><code>Image: myImage              # instance: Image type, named myImage
   img: "res/logo.png"       # property assignment
 Component: $MyButton        # type definition: new type MyButton
@@ -516,7 +523,7 @@ Ui::Card: cardOne           # instance of Card from the import aliased Ui</code>
 <h2 id="decl.typedef">Type definitions</h2>
 <div class="syntax"><span class="t">Syntax</span><span class="p"><span class="nt">TypeDefinition</span> <span class="op">:</span> <span class="nt">TypeKey</span> <span class="lit">": $"</span> <span class="nt">TypeName</span> EOL <span class="nt">Body</span><span class="op">?</span></span></div>
 <p class="rule-p"><a class="rule" id="decl.typedef.form" href="#decl.typedef.form">decl.typedef.form</a><code>Base: $Name</code> defines a new type <code>Name</code> derived from <code>Base</code>. The body has the same form as an instance body. Once defined, <code>Name: instanceName</code> creates instances of it.</p>
-<p class="rule-p"><a class="rule" id="decl.typedef.api" href="#decl.typedef.api">decl.typedef.api</a>Properties declared on the definition are the type's public interface; their values are defaults that an instance may override. Children of the definition are its internal structure.</p>
+<p class="rule-p"><a class="rule" id="decl.typedef.api" href="#decl.typedef.api">decl.typedef.api</a>Properties declared on the definition are the type's public interface; their values are defaults that an instance may override. Children of the definition are its structure: every instance gets its own copy of them, and that copy can be reached from outside the instance (<a href="#decl.children.access">decl.children.access</a>). Prefer properties as the way other objects use a type: they are what the type promises to keep, while its children are only how it is built today.</p>
 <p class="rule-p"><a class="rule" id="decl.typedef.rootlevel" href="#decl.typedef.rootlevel">decl.typedef.rootlevel</a>A type definition must be at the top level of a document; it must not be nested inside another component.</p>
 <p class="rule-p"><a class="rule" id="decl.typedef.name" href="#decl.typedef.name">decl.typedef.name</a>The first letter of the type name must be uppercase (leading underscores are allowed), and the name must not reuse a built-in type name: <code>Component: $Text</code> is rejected.</p>
 <p class="rule-p"><a class="rule" id="decl.typedef.base" href="#decl.typedef.base">decl.typedef.base</a>Any component type may be a base, including a user-defined type and an imported type.</p>
@@ -539,9 +546,19 @@ LabeledIcon: warning
   x: 40
   y: 60</code></pre>
 
-<h3 id="decl.opacity">Type opacity</h3>
-<p class="rule-p"><a class="rule" id="decl.opacity.in" href="#decl.opacity.in">decl.opacity.in</a>The children of a user-defined type are its private structure and must not be addressed from outside an instance. In the example above, use <code>warning.iconName</code> and <code>warning.labelText</code>, never <code>warning.icon</code>. To expose an internal value, declare a property on the type and have the internal child read it. <span class="status nd">Not diagnosed</span></p>
-<p class="rule-p"><a class="rule" id="decl.opacity.out" href="#decl.opacity.out">decl.opacity.out</a>Opacity runs both ways: a definition cannot reach whoever instantiates it. Inside a definition, <code>parent</code> means the definition's own structure, so a chain such as <code>parent.parent.value</code> written to reach the instance's owner resolves to nothing. Declare a property on the type and let the owner bind it at the instance declaration (<a href="#scope.typeboundary">§6.3</a>).</p>
+<h3 id="decl.children">Reaching into an instance</h3>
+<p class="rule-p"><a class="rule" id="decl.children.access" href="#decl.children.access">decl.children.access</a>An instance's children can be read and written from outside the instance by name, at any depth. In the example above, <code>warning.icon.x</code> reads the Image's <code>x</code>, and <code>code: warning.label.text = "Alert"</code> changes the Text. Through a nested instance the chain simply continues: <code>panel.row.warning.icon.x</code>.</p>
+<p class="rule-p"><a class="rule" id="decl.children.write" href="#decl.children.write">decl.children.write</a>A write to a property that has an expression lasts only until that expression is evaluated again. After <code>code: warning.label.text = "Alert"</code>, a change to <code>warning.labelText</code> re-evaluates <code>text: labelText</code>, and the Text shows the new <code>labelText</code>. That includes a change made earlier in the same action: <code>code: warning.labelText = "Caution"; warning.label.text = "Alert"</code> ends showing <code>"Caution"</code>, because the re-evaluation runs after the action. This is true of every write; it matters most to a writer outside the type, who does not see the expression. For a value that must stay as written, write the type's property (<code>warning.labelText</code>) instead.</p>
+<p class="rule-p"><a class="rule" id="decl.children.viaprop" href="#decl.children.viaprop">decl.children.viaprop</a>A chain that continues through a property holding an instance reaches only that instance's properties, not its children. With <code>ref: warning</code>, <code>ref.labelText</code> reads <code>"Warning"</code>, but <code>ref.label.text</code> reads <code>undefined</code>, and <code>code: ref.icon.x = 5</code> changes nothing. A Motion's <code>out</code> is such a chain, through <code>target</code>; that form is not diagnosed either, but the run logs a warning when it starts (<a href="#motion.target.declared">motion.target.declared</a>). To reach a child's value this way, declare a property on the type for it. <span class="status nd">Not diagnosed</span></p>
+<p class="rule-p"><a class="rule" id="decl.children.override" href="#decl.children.override">decl.children.override</a>An instance declaration overrides the type's properties only; it cannot replace a child. A child declared in an instance's body with the name of one of the type's children is a duplicate name, an error (<code>decl.duplicate-name</code>, <a href="#decl.names.unique">decl.names.unique</a>), and that child is not created. The same applies to a derived type that declares a child with the name of one of its base type's children. To vary a child per instance, declare a property on the type and have the child read it; to change it at run time, write it from a <code>code:</code> action (<a href="#decl.children.access">decl.children.access</a>).</p>
+<pre class="bad" data-lang="abp"><code>LabeledIcon: other
+  labelText: "Other"
+  Text: label               # WRONG -- decl.duplicate-name: the type already has a label
+    text: "Changed"</code></pre>
+<pre data-lang="abp"><code>LabeledIcon: other
+  labelText: "Changed"      # the type's label reads labelText</code></pre>
+<p class="rule-p"><a class="rule" id="decl.children.names" href="#decl.children.names">decl.children.names</a>A child that shares its name with a property its parent inherits, or with a built-in property its parent writes, cannot be reached by that name: the property answers first, so <code>inst.k</code> reads the property and <code>inst.k.n</code> is unresolved. The reverse holds for a component's own name, which answers before its properties: an instance named like one of its own type's properties (<code>Icon: glyph</code> where <code>$Icon</code> declares <code>glyph</code>) hides that property inside the instance. Both are reported as a warning (<code>decl.shadows-property</code>, <a href="#decl.names.shadow">decl.names.shadow</a>). Give children names that no property uses.</p>
+<p class="rule-p"><a class="rule" id="decl.children.out" href="#decl.children.out">decl.children.out</a>The reverse does not hold: a definition cannot reach whoever instantiates it. Inside a definition, <code>parent</code> means the definition's own structure, so a chain such as <code>parent.parent.value</code> written to reach the instance's owner resolves to nothing. Declare a property on the type and let the owner bind it at the instance declaration (<a href="#scope.typeboundary">§6.3</a>).</p>
 
 <h2 id="decl.property">Properties</h2>
 <div class="syntax"><span class="t">Syntax</span><span class="p"><span class="nt">PropertyEntry</span> <span class="op">:</span> <span class="nt">PropertyKey</span> <span class="lit">":"</span> ( <span class="lit">" "</span> ( <span class="nt">Expression</span> <span class="op">|</span> <span class="nt">BlockScalar</span> ) )<span class="op">?</span> EOL <span class="nt">ElementList</span><span class="op">?</span></span></div>
@@ -563,11 +580,12 @@ borders:                    # element form -- the same four elements
   r: 2
   t: 3</code></pre>
 <p class="rule-p"><a class="rule" id="decl.array.index" href="#decl.array.index">decl.array.index</a>Declaration order is index order, top down. Both forms address the same storage: <code>borders[0]</code> and <code>borders.l</code> are the same element.</p>
+<p class="rule-p"><a class="rule" id="decl.array.size" href="#decl.array.size">decl.array.size</a>A declared array has a fixed number of elements, the number declared. A write of a whole array writes the elements that fit: a longer source is cut, and a shorter one leaves the old elements after it. A value that is not an array is ignored. An empty literal <code>[]</code> declares no elements, so it is not a declared array: the property holds an ordinary array value, and a write of a whole array of any length replaces it, as it does for <code>items: 0</code>.</p>
 <p class="rule-p"><a class="rule" id="decl.array.names" href="#decl.array.names">decl.array.names</a>Element names are chosen by the author. They are labels and access paths, not schema fields, and nothing checks them against the property. The positional meaning is fixed by the property; for <code>borders</code> it is left, bottom, right, top regardless of the names used.</p>
 <p class="rule-p"><a class="rule" id="decl.array.expr" href="#decl.array.expr">decl.array.expr</a>Element values are ordinary reactive expressions. An element with children of its own is a nested array, to any depth.</p>
 
 <h2 id="decl.names">Name uniqueness and shadowing</h2>
-<p class="rule-p"><a class="rule" id="decl.names.unique" href="#decl.names.unique">decl.names.unique</a>Two siblings must not share a name (<code>decl.duplicate-name</code>), and a child must not share its parent's name (<code>decl.parent-name</code>). This applies to array elements too: two elements named <code>l</code> are an error, not an overwrite.</p>
+<p class="rule-p"><a class="rule" id="decl.names.unique" href="#decl.names.unique">decl.names.unique</a>Two siblings must not share a name (<code>decl.duplicate-name</code>), and a child must not share its parent's name (<code>decl.parent-name</code>). This applies to array elements too: two elements named <code>l</code> are an error, not an overwrite. It also applies to the children an instance gets from its type: a child declared under an instance, or under a derived type, with the name of one of those children is a duplicate (<a href="#decl.children.override">decl.children.override</a>).</p>
 <p class="rule-p"><a class="rule" id="decl.names.shadow" href="#decl.names.shadow">decl.names.shadow</a>A child must not share a name with a property declared in the same scope; that is an error (<code>decl.duplicate-name</code>). An instance or child should not share a name with a property of its type or of its parent — one the type declares or inherits, or a built-in property the type writes: a component answers its own name before its properties, so the name hides the property, or is itself hidden by it. That is reported as a warning (<code>decl.shadows-property</code>).</p>
 <pre class="bad" data-lang="abp"><code>Component: $Icon
   glyph: "?"
@@ -581,7 +599,7 @@ Icon: glyph                 # WRONG -- instance named like its type's property</
 <!-- ===================================================================== -->
 <section class="chapter" id="expressions" data-title="Expressions">
 <h1>Expressions</h1>
-<p>The right-hand side of every property assignment, event condition and action is an expression in ABP's subset of JavaScript. It follows current ECMAScript rather than one edition, and includes features such as <code>??</code> and the <code>at</code>, <code>includes</code>, <code>padStart</code> and <code>trimStart</code> methods. This chapter defines the subset.</p>
+<p>The right-hand side of every property assignment, event condition and action is an expression in ABP's subset of JavaScript. It follows current ECMAScript rather than one edition, and includes features such as <code>??</code> and the <code>at</code>, <code>includes</code>, <code>padStart</code> and <code>trimStart</code> methods. Where a result differs from ECMAScript, <a href="#expr.diff">§5.6</a> says so. This chapter defines the subset.</p>
 
 <h2 id="expr.literals">Literals</h2>
 <div class="tablewrap"><table>
@@ -619,16 +637,22 @@ Icon: glyph                 # WRONG -- instance named like its type's property</
 <tr><td><code>=</code> <code>+=</code> <code>-=</code> <code>*=</code> <code>/=</code></td><td>Assignment</td></tr>
 </table></div>
 <p class="rule-p"><a class="rule" id="expr.op.nullish" href="#expr.op.nullish">expr.op.nullish</a><code>??</code> binds more loosely than <code>||</code>. Unlike ECMAScript, ABP accepts <code>??</code> mixed with <code>||</code> or <code>&amp;&amp;</code> without parentheses; add parentheses to make the grouping clear.</p>
+<p class="rule-p"><a class="rule" id="expr.truthy" href="#expr.truthy">expr.truthy</a>A value is truthy unless it is <code>false</code>, <code>0</code>, <code>-0</code>, <code>NaN</code>, <code>""</code>, <code>null</code> or <code>undefined</code>, as in ECMAScript. Every other number, such as <code>0.5</code> or <code>Infinity</code>, every object, and every array, including <code>[]</code>, is truthy. <code>!</code>, <code>&amp;&amp;</code>, <code>||</code>, <code>? :</code>, <code>@if</code>, event conditions, <code>visible</code> and <code>enabled</code> use this rule.</p>
 <p class="rule-p"><a class="rule" id="expr.op.equality" href="#expr.op.equality">expr.op.equality</a>There is no strict equality. <code>===</code> parses but is refused (<code>expr.generate</code>, “Unsupported expression construct”); <code>!==</code> is a parse error (<code>expr.parse</code>). Use <code>==</code> and <code>!=</code>.</p>
 <p class="rule-p"><a class="rule" id="expr.op.compound" href="#expr.op.compound">expr.op.compound</a>The only compound assignments are <code>+=</code> <code>-=</code> <code>*=</code> <code>/=</code>. Every other compound form (<code>%=</code> <code>**=</code> <code>&amp;=</code> <code>|=</code> <code>^=</code> <code>&lt;&lt;=</code> <code>&gt;&gt;=</code> <code>&gt;&gt;&gt;=</code> <code>&amp;&amp;=</code> <code>||=</code> <code>??=</code>) is a parse error.</p>
 <p class="rule-p"><a class="rule" id="expr.op.writes" href="#expr.op.writes">expr.op.writes</a>Assigning a property or array element, and <code>++</code>/<code>--</code> on one, is a write. Writes are legal only in a <code>code:</code> action (<a href="#eval.writes">§7.2</a>). Assigning a <code>let</code> local is not a write and is allowed in any expression body.</p>
 
 <h2 id="expr.statements">Statements and declarations</h2>
-<p class="rule-p"><a class="rule" id="expr.stmt.set" href="#expr.stmt.set">expr.stmt.set</a>Any expression body may contain <code>let</code> and <code>const</code> declarations and the statements <code>if</code>/<code>else</code>, <code>for</code>, <code>while</code>, <code>do</code>, <code>switch</code>, <code>break</code> and <code>return</code>. Statements are separated by newlines or semicolons.</p>
+<p class="rule-p"><a class="rule" id="expr.stmt.set" href="#expr.stmt.set">expr.stmt.set</a>Any expression body may contain <code>let</code> and <code>const</code> declarations (<code>const</code> is not enforced, <a href="#expr.diff.const">expr.diff.const</a>) and the statements <code>if</code>/<code>else</code>, <code>for</code>, <code>while</code>, <code>do</code>, <code>switch</code>, <code>break</code> and <code>return</code>. Statements are separated by newlines or semicolons. <code>return</code> ends the body with its value, and no statement after it runs. In a <code>code:</code> action it ends that action; the handler's next action still runs.</p>
 <pre data-lang="abp"><code>@complete:
   code: |
     let next = App.count + 1;
     App.count = next > 9 ? 0 : next;</code></pre>
+<p class="rule-p"><a class="rule" id="expr.stmt.block" href="#expr.stmt.block">expr.stmt.block</a>Statements may be grouped in braces. A braced block at the top of a body gives the same value as its statements without the braces, so a short body fits on one line.</p>
+<pre data-lang="abp"><code>total: { let s = 0; for (let i = 0; i &lt; 5; i++) { s = s + i; } s }   # gives 10, the same as these statements in a | block</code></pre>
+<p class="rule-p"><a class="rule" id="expr.stmt.value" href="#expr.stmt.value">expr.stmt.value</a>A body gives the value of the last statement that ran, as in JavaScript. An <code>if</code>, a loop or a <code>switch</code> gives the value of the last statement that ran inside it, or <code>undefined</code> when none did, never its condition or a case test. A value with no statements at all, empty or only a comment, is <code>null</code>, which reads as 0.</p>
+<pre data-lang="abp"><code>size: { if (D.n &gt; 2) { "many" } else { "few" } }   # gives "many" or "few"
+last: { for (let i = 0; i &lt; 3; i++) { i * 10 } }   # gives 20, the last pass's value</code></pre>
 
 <h2 id="expr.calls">Calls</h2>
 <p class="rule-p"><a class="rule" id="expr.call.kinds" href="#expr.call.kinds">expr.call.kinds</a>Exactly three kinds of callee exist. A call that is none of them — a user function, or an unknown built-in or action name — is refused when the design loads (<code>expr.generate</code>, “Unknown or unsupported function call”).</p>
@@ -661,6 +685,19 @@ Icon: glyph                 # WRONG -- instance named like its type's property</
 <p class="rule-p"><a class="rule" id="expr.enum.form" href="#expr.enum.form">expr.enum.form</a>An enumeration value is written <code>EnumType::Value</code> as one contiguous token, with no spaces around <code>::</code>. Value names are capitalized: <code>Justify::Center</code>, <code>ShapeType::Ellipse</code>, <code>Button::Right</code>.</p>
 <p class="rule-p"><a class="rule" id="expr.enum.dot" href="#expr.enum.dot">expr.enum.dot</a>The dot form <code>Justify.Center</code> is not an enumeration value. A <code>.</code> chain resolves through scope; <code>::</code> resolves through the enumeration tables; the two never mix. An enumeration value must carry its type prefix: <code>flexDirection: Row</code> reads a name <code>Row</code>.</p>
 <p>All enumerations are listed in <a href="#enums">Appendix B</a>.</p>
+
+<h2 id="expr.diff">Differences from JavaScript</h2>
+<p class="rule-p"><a class="rule" id="expr.diff.list" href="#expr.diff.list">expr.diff.list</a>The following parse and run, but give a result that is not the ECMAScript result. None is diagnosed, so write around each one.</p>
+<p class="rule-p"><a class="rule" id="expr.diff.const" href="#expr.diff.const">expr.diff.const</a><code>const</code> is not enforced; it behaves as <code>let</code>. <code>const c = 1; c = 2;</code>, and also <code>c += 1</code> and <code>c++</code>, assign 2. <span class="status nd">Not diagnosed</span></p>
+<p class="rule-p"><a class="rule" id="expr.diff.real" href="#expr.diff.real">expr.diff.real</a>A real keeps 45 significant bits, about 13 decimal digits; ECMAScript keeps 53. <code>0.1 + 0.2</code> is <code>0.29999999999998295</code>, and a whole number above 2<sup>45</sup> (35184372088832) loses its low digits: <code>1e15 + 1 == 1e15</code> is true. A bitwise operator reads the rounded value, so <code>1e21 | 0</code> is -570425344. <span class="status nd">Not diagnosed</span></p>
+<p class="rule-p"><a class="rule" id="expr.diff.compare" href="#expr.diff.compare">expr.diff.compare</a><code>==</code> and <code>!=</code> compare reals with a relative tolerance of 2<sup>-44</sup>. <code>&lt;</code> and <code>&gt;</code> compare exactly, and <code>&lt;=</code> and <code>&gt;=</code> are <code>&lt;</code> or <code>&gt;</code> or the tolerant <code>==</code>. So <code>0.1 + 0.2 == 0.3</code> and <code>0.1 + 0.2 &lt; 0.3</code> are both true, and <code>0.1 + 0.2 &gt; 0.3</code> is false. Integers in the 32-bit range compare exactly, <code>Infinity</code> equals only itself, and <code>NaN</code> equals nothing. Do not test a computed real for equality; compare with a margin: <code>Math.abs(a - b) &lt; 0.001</code>. <span class="status nd">Not diagnosed</span></p>
+<p class="rule-p"><a class="rule" id="expr.diff.arrayeq" href="#expr.diff.arrayeq">expr.diff.arrayeq</a><code>==</code> does not convert an array to a primitive. <code>[1] == 1</code>, <code>["1"] == 1</code> and <code>[1, 2] == "1,2"</code> are false. Compare an element, or <code>join()</code> first. <span class="status nd">Not diagnosed</span></p>
+<p class="rule-p"><a class="rule" id="expr.diff.numlit" href="#expr.diff.numlit">expr.diff.numlit</a>Only decimal and <code>0x</code> number literals are read. <code>0b101</code> reads 0 and <code>1_000</code> reads 1; <code>0o17</code> is not a number. <span class="status nd">Not diagnosed</span></p>
+<p class="rule-p"><a class="rule" id="expr.diff.template" href="#expr.diff.template">expr.diff.template</a>A template string drops its escape sequences: <code>`a\nb`</code> is <code>"ab"</code> and <code>`\u0041`</code> is <code>""</code>. Quoted strings decode escapes, so join one in: <code>a + "\n" + b</code>. <span class="status nd">Not diagnosed</span></p>
+<p class="rule-p"><a class="rule" id="expr.diff.nul" href="#expr.diff.nul">expr.diff.nul</a>A NUL character ends a string: <code>"a\u0000b".length</code> is 1. <span class="status nd">Not diagnosed</span></p>
+<p class="rule-p"><a class="rule" id="expr.diff.strlimit" href="#expr.diff.strlimit">expr.diff.strlimit</a>The string limit of 65535 bytes applies to some operations only. <code>repeat</code>, <code>padStart</code>, <code>padEnd</code> and <code>concat</code> give <code>undefined</code> past it; <code>+</code> and template strings do not stop there. Keep strings small. <span class="status nd">Not diagnosed</span></p>
+<p class="rule-p"><a class="rule" id="expr.diff.index" href="#expr.diff.index">expr.diff.index</a>A fractional index is truncated toward zero: <code>[1, 2, 3][1.5]</code> is 2 and <code>"abc"[1.5]</code> is <code>"b"</code>, where ECMAScript gives <code>undefined</code>. Round a computed index: <code>list[Math.floor(n / 2)]</code>. <span class="status nd">Not diagnosed</span></p>
+<p class="rule-p"><a class="rule" id="expr.diff.trailingcomma" href="#expr.diff.trailingcomma">expr.diff.trailingcomma</a>A trailing comma in an array literal adds three <code>null</code> elements: <code>[1, 2,].length</code> is 5 and <code>[1, 2,].join("|")</code> is <code>"1|2|||"</code>. With one element, <code>[1,]</code> is a parse error (<code>expr.parse</code>). Write no comma after the last element. <span class="status nd">Not diagnosed</span></p>
 
 <h2 id="expr.unsupported">Unsupported constructs</h2>
 <p class="rule-p"><a class="rule" id="expr.unsupported.list" href="#expr.unsupported.list">expr.unsupported.list</a>The following are not part of the subset:</p>
@@ -701,12 +738,13 @@ justify: Justify::Center                   # enumeration value</code></pre>
 <tr><td><code>root</code></td><td>The design root</td><td><code>root.userProp</code></td></tr>
 <tr><td><code>target</code></td><td>Inside a <code>Motion</code> only: the object a run animates (<a href="#motion.target">§13.3</a>)</td><td><code>target.x</code></td></tr>
 </table></div>
+<p class="rule-p"><a class="rule" id="scope.ns.links" href="#scope.ns.links">scope.ns.links</a>Every object also has the properties <code>parent</code>, <code>sibling</code> and <code>child</code>: its parent, its next sibling under that parent, and its first child. They are read like any other property (<code>card.child.x</code>) and are computed from the design's structure. <span class="status intr">Intrinsic</span> <span class="status prot">Protected</span> A write to them is ignored (<a href="#eval.writes.readonly">eval.writes.readonly</a>).</p>
 <p class="rule-p"><a class="rule" id="scope.ns.convention" href="#scope.ns.convention">scope.ns.convention</a><code>this</code> and <code>parent</code> are reserved names. <code>src</code> and <code>root</code> are conventions of name resolution rather than keywords: <code>src</code> is a property the event exposes while it dispatches, and <code>root</code> is the name of the design root. They must not be reused as names (<a href="#lex.reserved.ns">lex.reserved.ns</a>).</p>
 
 <h2 id="scope.resolution">Resolving names</h2>
 <p class="rule-p"><a class="rule" id="scope.res.walk" href="#scope.res.walk">scope.res.walk</a>An unprefixed identifier is resolved through scope: first the owning component's own properties and children, then each ancestor's properties and children, nearest first. This is how a child reads a property its parent declares.</p>
 <p class="rule-p"><a class="rule" id="scope.res.chain" href="#scope.res.chain">scope.res.chain</a>Only the first name of a chain walks scope. A name after a <code>.</code> is a member of the object before it and is looked up on that object alone: <code>this.x</code>, <code>parent.x</code> and <code>card.label.x</code> never fall back to an ancestor's <code>x</code>.</p>
-<p class="rule-p"><a class="rule" id="scope.res.unset" href="#scope.res.unset">scope.res.unset</a>A built-in property that an object leaves unset is not declared on it, so a chain that reads it (<code>warningLamp.alpha</code> with no <code>alpha:</code> on <code>warningLamp</code>) is reported unresolved, and reads the default at run time, while a write or a <code>Motion</code> through it changes nothing. Write the property, at its default, on any object whose property is read, written or animated through a chain (<a href="#decl.prop.declared">decl.prop.declared</a>).</p>
+<p class="rule-p"><a class="rule" id="scope.res.unset" href="#scope.res.unset">scope.res.unset</a>A built-in property that an object leaves unset is not declared on it, so a chain that reads it (<code>warningLamp.alpha</code> with no <code>alpha:</code> on <code>warningLamp</code>) is reported unresolved, and reads the default at run time, while a write or a <code>Motion</code> through it changes nothing. Write the property, at its default, on any object whose property is read, written or animated through a chain (<a href="#decl.prop.declared">decl.prop.declared</a>). A bare name is not answered by an unset built-in either: <code>enabled == false</code> inside a type that leaves <code>enabled</code> unset walks past the instance to the nearest ancestor that declares <code>enabled</code> (<a href="#scope.res.walk">scope.res.walk</a>), so a type that reads its own built-in by bare name must declare it.</p>
 <p class="rule-p"><a class="rule" id="scope.res.unresolved" href="#scope.res.unresolved">scope.res.unresolved</a>If a chain names nothing it is unresolved and is diagnosed <code>expr.resolve</code>. At run time, reading it yields nothing and writing it changes nothing, with one exception: a chain ending in a built-in property the object leaves unset reads that property's default (<code>alpha</code> reads 255, <code>x</code> reads 0).</p>
 <p class="rule-p"><a class="rule" id="scope.res.byname" href="#scope.res.byname">scope.res.byname</a>Objects are addressed by their declared names: <code>Vehicle.speed</code>. Domain prefixes such as <code>data.</code> or <code>strings.</code> must not be used. They are accepted silently, and <code>data.speed</code> resolves against the first top-level object of that kind, which is rarely the one intended. <span class="status nd">Not diagnosed</span></p>
 
@@ -734,13 +772,114 @@ Component: $Row
 <h1>Evaluation model</h1>
 
 <h2 id="eval.reactive">Reactive bindings</h2>
-<p class="rule-p"><a class="rule" id="eval.reactive.default" href="#eval.reactive.default">eval.reactive.default</a>Property bindings are reactive. When a value changes, every property expression that reads it is evaluated again, and anything that reads those properties follows in turn.</p>
+<p class="rule-p"><a class="rule" id="eval.reactive.default" href="#eval.reactive.default">eval.reactive.default</a>Property bindings are reactive. When a value changes, every property expression that reads it is evaluated again, and anything that reads those properties follows in turn. A change to a Non-reactive property is the exception: it re-evaluates nothing (<a href="#eval.propclass">eval.propclass</a>).</p>
 <pre data-lang="abp"><code>Data: Vehicle
   speed: 0
 
 Text: speedReadout
   text: Vehicle.speed + " km/h"     # re-evaluates whenever Vehicle.speed changes</code></pre>
 <p class="rule-p"><a class="rule" id="eval.handlers.ondemand" href="#eval.handlers.ondemand">eval.handlers.ondemand</a>Event handlers are the exception. A handler's condition is evaluated when its trigger fires, and an action body when it runs; neither is re-evaluated when something it reads changes. A condition therefore sees state as of the moment of dispatch. The one reactive trigger is <code>@if</code> (<a href="#ev.if">§8.2</a>).</p>
+<p class="rule-p"><a class="rule" id="eval.reactive.frame" href="#eval.reactive.frame">eval.reactive.frame</a>Properties are updated in one pass per frame. A write changes the property written at once. The properties computed from it are evaluated again in the next update pass, not at the moment of the write.</p>
+<p>The figure shows the parts of a frame and where each kind of write is picked up; the rules below refer to it.</p>
+<svg class="coord" viewBox="0 0 640 290" width="640" role="img" aria-label="Two frames in sequence. Each frame runs a tick phase (@init at start, @tick, @complete), then an update pass (sources, then computed properties, then @if handlers), then the screen pump (pointer handlers, then the draw). Writes from the tick phase reach computed properties in the same update pass. Writes from @if handlers and pointer handlers, and host writes, reach them in the next frame's update pass; each further @if in a chain adds one frame.">
+  <!-- frame labels -->
+  <text class="ttl" x="10" y="74">frame N</text>
+  <text class="ttl" x="10" y="234">frame N+1</text>
+
+  <!-- frame N -->
+  <rect class="box" x="96" y="40" width="132" height="76" rx="6" stroke-width="1.5"/>
+  <text class="ttl" x="106" y="62">tick phase</text>
+  <text class="mut" x="106" y="82">@tick @complete</text>
+  <text class="mut" x="106" y="100">@init (at start)</text>
+  <rect class="box2" x="244" y="40" width="196" height="76" rx="6" stroke-width="1.5"/>
+  <text class="ttl" x="254" y="62">update pass</text>
+  <text class="mut" x="254" y="82">sources → computed</text>
+  <text class="mut" x="254" y="100">then @if handlers</text>
+  <rect class="box" x="456" y="40" width="172" height="76" rx="6" stroke-width="1.5"/>
+  <text class="ttl" x="466" y="62">screen pump</text>
+  <text class="mut" x="466" y="82">pointer handlers</text>
+  <text class="mut" x="466" y="100">then draw</text>
+  <path class="ln" d="M228 78 H238 M440 78 H450" stroke-width="1.2"/>
+  <path class="head" d="M236 74 L244 78 L236 82 Z M448 74 L456 78 L448 82 Z"/>
+
+  <!-- frame N+1 -->
+  <rect class="box" x="96" y="200" width="132" height="76" rx="6" stroke-width="1.5"/>
+  <text class="ttl" x="106" y="222">tick phase</text>
+  <text class="mut" x="106" y="242">@tick @complete</text>
+  <rect class="box2" x="244" y="200" width="196" height="76" rx="6" stroke-width="1.5"/>
+  <text class="ttl" x="254" y="222">update pass</text>
+  <text class="mut" x="254" y="242">sources → computed</text>
+  <text class="mut" x="254" y="260">then @if handlers</text>
+  <rect class="box" x="456" y="200" width="172" height="76" rx="6" stroke-width="1.5"/>
+  <text class="ttl" x="466" y="222">screen pump</text>
+  <text class="mut" x="466" y="242">pointer handlers</text>
+  <text class="mut" x="466" y="260">then draw</text>
+  <path class="ln" d="M228 238 H238 M440 238 H450" stroke-width="1.2"/>
+  <path class="head" d="M236 234 L244 238 L236 242 Z M448 234 L456 238 L448 242 Z"/>
+
+  <!-- host writes land in the next update pass -->
+  <path class="wr" d="M300 14 V34" stroke-width="1.6"/>
+  <path class="wrhead" d="M296 32 L300 40 L304 32 Z"/>
+  <text class="wrt" x="308" y="22">host writes</text>
+
+  <!-- tick-phase writes: same pass -->
+  <path class="wr" d="M162 116 C162 150 280 150 280 124" stroke-width="1.6"/>
+  <path class="wrhead" d="M276 126 L280 116 L284 126 Z"/>
+  <text class="wrt" x="150" y="166">same frame</text>
+
+  <!-- @if writes: next frame -->
+  <path class="wr" d="M372 116 V192" stroke-width="1.6"/>
+  <path class="wrhead" d="M368 190 L372 200 L376 190 Z"/>
+  <text class="wrt" x="364" y="152" text-anchor="end">@if writes</text>
+  <text class="wrt" x="364" y="168" text-anchor="end">next frame</text>
+  <text class="mut" x="364" y="186" text-anchor="end">+1 per chained @if</text>
+
+  <!-- pointer-handler writes: next frame -->
+  <path class="wr" d="M542 116 C542 160 420 156 420 192" stroke-width="1.6"/>
+  <path class="wrhead" d="M416 190 L420 200 L424 190 Z"/>
+  <text class="wrt" x="552" y="146">pointer</text>
+  <text class="wrt" x="552" y="162">writes</text>
+</svg>
+<p class="rule-p"><a class="rule" id="eval.handlers.reads" href="#eval.handlers.reads">eval.handlers.reads</a>A property computed from a value written since the last update pass keeps its old value until the next update pass. A <code>code:</code> statement that reads it after the write gets the old value, and so does a later handler in the same part of the frame, such as a second <code>@tick</code>. A <code>Motion</code> that the handler starts reads the old value too: its <code>@start</code> handler, and the guards, <code>to:</code> and <code>from:</code> of its first Step (<a href="#motion.guard">§13.1</a>). Compute from the value you wrote, not from the property computed from it.</p>
+<pre data-lang="abp"><code>Data: A
+  s: 0
+  scaled: s * 10
+  copy: 0
+
+Shape: writer
+  kind: ShapeType::Rect
+  points: [[0, 0], [200, 100]]
+  @press:
+    code: |
+      A.s = 2
+      A.copy = A.scaled     // 0: scaled is not evaluated again until the next update pass
+      A.copy = A.s * 10     // 20: computed from the value written</code></pre>
+<p class="rule-p"><a class="rule" id="eval.handlers.frames" href="#eval.handlers.frames">eval.handlers.frames</a>When the writes of a handler reach the properties computed from them depends on when the handler runs:</p>
+<ul>
+  <li><code>@init</code> when the design starts, <code>@tick</code>, and the <code>@complete</code> of a <code>Timer</code> or a <code>Motion</code> run before the update pass of their frame. Their writes reach the computed properties in the same frame.</li>
+  <li><code>@if</code> handlers run at the end of the update pass, after every other property is updated. Their writes reach the computed properties in the next frame. Each further <code>@if</code> in a chain adds one frame: an <code>@if</code> that writes <code>A.s</code>, and a second <code>@if: A.s &gt; 1</code> that writes <code>B.t</code>, update a property computed from <code>B.t</code> two frames after the first handler runs.</li>
+  <li>Pointer handlers such as <code>@press</code> run when the frame handles input, after its update pass. Their writes reach the computed properties in the next frame.</li>
+</ul>
+<p class="rule-p"><a class="rule" id="eval.reactive.draw" href="#eval.reactive.draw">eval.reactive.draw</a>Each frame ends with a draw. A property that a handler writes is drawn at the next draw, so a write from an <code>@if</code> or pointer handler is drawn in the same frame. A computed property is drawn after the update pass that evaluates it, so a property computed from that write is drawn one frame later.</p>
+
+<h2 id="eval.propclass">Property classes</h2>
+<p class="rule-p"><a class="rule" id="eval.propclass.list" href="#eval.propclass.list">eval.propclass.list</a>Every built-in property belongs to one or more of these classes. The property tables mark each class with its badge; a property with no badge is Reactive.</p>
+<div class="tablewrap"><table>
+<tr><th>Class</th><th>Badge</th><th>Meaning</th></tr>
+<tr><td>Reactive</td><td>none</td><td>Authored. A <code>code:</code> action may write it, and so may a host where <a href="#host.data.write">host.data.write</a> allows. A change re-evaluates every expression that reads it (<a href="#eval.reactive.default">eval.reactive.default</a>)</td></tr>
+<tr><td>Read-only</td><td><span class="status ro">Read-only</span></td><td>Fixed by its authored value for the life of the design. An expression in it is evaluated when its object uses it, such as an operation's <code>to</code> when its Step starts, and not when something it reads changes. A write is ignored</td></tr>
+<tr><td>Protected</td><td><span class="status prot">Protected</span></td><td>Written only by the runtime, such as a Timer's <code>remaining</code>. Readable everywhere; a write is ignored. Reactive unless it is also Non-reactive</td></tr>
+<tr><td>Non-reactive</td><td><span class="status nr">Non-reactive</span></td><td>A change re-evaluates nothing. An expression that reads it sees the current value the next time it is evaluated for another reason. Read it from a handler or <code>@tick</code>, which evaluate when they run</td></tr>
+<tr><td>Intrinsic</td><td><span class="status intr">Intrinsic</span></td><td>Supplied by the runtime from the design's structure, such as <code>parent</code>. It has no authored value and is not stored</td></tr>
+</table></div>
+<p class="rule-p"><a class="rule" id="eval.propclass.combine" href="#eval.propclass.combine">eval.propclass.combine</a>Classes combine. The pointer payload and a Motion's <code>target</code>, <code>time</code> and <code>step</code> are Protected and Non-reactive; a Timer's <code>active</code> and <code>remaining</code> and a Motion's <code>running</code> are Protected and reactive; <code>parent</code>, <code>sibling</code> and <code>child</code> are Intrinsic and Protected.</p>
+<pre data-lang="abp"><code>Text: countdown
+  text: "left " + beat.remaining       # Protected, reactive: follows the Timer
+
+Text: progress
+  text: "at " + puck.slide.time        # WRONG -- Non-reactive: stays at its first value
+  @tick:
+    code: this.text = "at " + puck.slide.time   # read it where it is evaluated</code></pre>
 
 <h2 id="eval.writes">Writes belong to code actions</h2>
 <p class="rule-p"><a class="rule" id="eval.writes.rule" href="#eval.writes.rule">eval.writes.rule</a>An expression that writes state is a procedure, not a value. It is legal only as the body of a <code>code:</code> action. In any other position — a property value, an event condition, a <code>log:</code> body — it is refused (<code>expr.side-effects</code>).</p>
@@ -753,6 +892,7 @@ Text: readout
   @press:
     code: state.count += 1           # procedure: the write is allowed here</code></pre>
 <pre class="bad" data-lang="abp"><code>text: state.count += 1               # WRONG -- write in a value slot</code></pre>
+<p class="rule-p"><a class="rule" id="eval.writes.readonly" href="#eval.writes.readonly">eval.writes.readonly</a>A write to a Read-only or Protected property (<a href="#eval.propclass">eval.propclass</a>) is ignored. While the design runs, the first such write to each property logs <code>'beat.active' is read-only; the write is ignored</code>, once per property per run. <code>--check</code> and the editor report the write as <code>expr.read-only-write</code> (warning) when they can tell which property it reaches. A host write is refused with <code>read-only</code> (<a href="#host.data.write">host.data.write</a>). A Motion operation whose <code>out</code> or <code>orient</code> names such a property drives nothing, and the run logs <code>motion: `out` names read-only 'remaining'; it is not driven</code>.</p>
 
 <h2 id="eval.runmode">Run mode</h2>
 <p class="rule-p"><a class="rule" id="eval.run.handlers" href="#eval.run.handlers">eval.run.handlers</a>Event handlers dispatch only while the design is running. Rendering and property propagation remain live when it is stopped, so an editor shows a live design whose handlers are silent.</p>
@@ -766,7 +906,7 @@ Text: readout
 <h2 id="ev.syntax">Handler syntax</h2>
 <div class="syntax"><span class="t">Syntax</span><span class="p"><span class="nt">EventHandler</span> <span class="op">:</span> <span class="lit">"@"</span> <span class="nt">EventName</span> <span class="lit">":"</span> ( <span class="lit">" "</span> <span class="nt">Condition</span> )<span class="op">?</span> EOL <span class="nt">Action</span><span class="op">*</span>   <span class="op">// actions one level deeper; an empty handler is accepted</span>
 <span class="nt">Condition</span>    <span class="op">:</span> <span class="nt">Expression</span></span></div>
-<p class="rule-p"><a class="rule" id="ev.syntax.cond" href="#ev.syntax.cond">ev.syntax.cond</a>An event handler is an <code>@</code>-prefixed key whose optional value is a condition. The handler runs only if the condition is truthy when the trigger fires. Its children are actions.</p>
+<p class="rule-p"><a class="rule" id="ev.syntax.cond" href="#ev.syntax.cond">ev.syntax.cond</a>An event handler is an <code>@</code>-prefixed key whose optional value is a condition. The handler runs only if the condition is <a href="#expr.truthy">truthy</a> when the trigger fires. Its children are actions.</p>
 <p class="rule-p"><a class="rule" id="ev.syntax.case" href="#ev.syntax.case">ev.syntax.case</a>Event names are camelCase and must be spelled exactly as listed: <code>@press</code>, <code>@doubleTap</code>. <code>@Press</code> and <code>on-press</code> are not event names.</p>
 <p class="rule-p"><a class="rule" id="ev.syntax.where" href="#ev.syntax.where">ev.syntax.where</a>A handler may be placed on any component body and at the top level. It must not be placed under a property, or nested inside another handler or action.</p>
 <pre data-lang="abp"><code>Component: powerButton
@@ -791,7 +931,7 @@ Text: readout
 <p class="rule-p"><a class="rule" id="ev.triggers.none" href="#ev.triggers.none">ev.triggers.none</a>There is no wildcard trigger, and there are no swipe or fling triggers. A swipe is a condition over the release payload (<code>@release: src.xVelocity &lt; -200</code>); a fling is a <code>Motion</code> started from that handler with the release velocity (<a href="#motion.spring">§13.8</a>).</p>
 
 <h3 id="ev.if">The <code>@if</code> trigger</h3>
-<p class="rule-p"><a class="rule" id="ev.if.reactive" href="#ev.if.reactive">ev.if.reactive</a>The condition of <code>@if</code> is re-evaluated whenever a value it reads changes, and the handler runs each time that re-evaluation is truthy. It is the way to run an action when a value changes, as opposed to merely displaying the value.</p>
+<p class="rule-p"><a class="rule" id="ev.if.reactive" href="#ev.if.reactive">ev.if.reactive</a>The condition of <code>@if</code> is re-evaluated whenever a value it reads changes, and the handler runs each time that re-evaluation is <a href="#expr.truthy">truthy</a>. It is the way to run an action when a value changes, as opposed to merely displaying the value.</p>
 <p class="rule-p"><a class="rule" id="ev.if.cond" href="#ev.if.cond">ev.if.cond</a><code>@if</code> must be given a condition; without one it never fires. <span class="status nd">Not diagnosed</span></p>
 <p class="rule-p"><a class="rule" id="ev.if.initial" href="#ev.if.initial">ev.if.initial</a><code>@if</code> does not fire for the state at startup, only when a value it reads changes. To act on the initial state as well, handle <code>@init</code> too.</p>
 <pre data-lang="abp"><code>Data: Vehicle
@@ -826,21 +966,23 @@ Text: warning
 <p class="rule-p"><a class="rule" id="ev.pointer.timing" href="#ev.pointer.timing">ev.pointer.timing</a>Gesture timing is fixed and cannot be changed from ABP: tap 200 ms, double-tap 1000 ms, hold 500 ms, drag dead zone 2 px.</p>
 <p class="rule-p"><a class="rule" id="ev.pointer.button" href="#ev.pointer.button">ev.pointer.button</a>Button identity is part of the payload, not the trigger. Every button arms the gesture machine; a condition selects a button with <code>src.button == Button::Right</code>. The values are <code>Button::None</code>, <code>Button::Left</code>, <code>Button::Middle</code> and <code>Button::Right</code>.</p>
 <p class="rule-p"><a class="rule" id="ev.pointer.disabled" href="#ev.pointer.disabled">ev.pointer.disabled</a>A component whose <code>enabled</code> property is false is transparent to pointer input and stops receiving <code>@tick</code>.</p>
+<p class="rule-p"><a class="rule" id="ev.pointer.effects" href="#ev.pointer.effects">ev.pointer.effects</a>Inside a buffered, blurred or masked component, a child takes pointer input only inside the box (<a href="#view.effects.size">view.effects.size</a>), not where the box clips it. A mask's stencil shape is not consulted.</p>
+<p class="rule-p"><a class="rule" id="ev.pointer.overlap" href="#ev.pointer.overlap">ev.pointer.overlap</a>When objects overlap, a press goes to the topmost object under the pointer that has a pointer trigger. If that object has <code>press</code>, <code>hold</code>, <code>release</code>, <code>click</code>, <code>tap</code>, <code>doubleTap</code> or <code>drag</code> (any axis form), it takes the press, and the drag and release that follow, and nothing beneath it receives them. An object with only <code>enter</code>, <code>leave</code> or <code>hover</code> triggers, or with no pointer triggers, lets the press through to the next object down. Pointer movement is not blocked: objects beneath still get <code>enter</code>, <code>leave</code> and <code>hover</code> unless a press on the object above is in progress. An object takes input over its box (the object and its children, cut by clip windows and by the box of a buffered, blurred or masked component, <a href="#ev.pointer.effects">ev.pointer.effects</a>), not over its painted shape. An object that is hidden (<code>visible: false</code>, or a hidden ancestor) or not enabled is skipped. <code>alpha</code> does not count: an object at <code>alpha: 0</code> still takes presses, so bind <code>enabled: alpha &gt; 0</code> on anything that fades out.</p>
 
 <h3 id="ev.payload">The <code>src</code> payload</h3>
 <p class="rule-p"><a class="rule" id="ev.payload.props" href="#ev.payload.props">ev.payload.props</a>During a pointer dispatch, <code>src</code> exposes:</p>
 <div class="tablewrap"><table>
 <tr><th>Property</th><th>Meaning</th></tr>
-<tr><td><code>x</code> <code>y</code></td><td>Current pointer position</td></tr>
-<tr><td><code>startX</code> <code>startY</code></td><td>Position at press</td></tr>
-<tr><td><code>lastX</code> <code>lastY</code></td><td>Position at the previous delivery</td></tr>
-<tr><td><code>deltaX</code> <code>deltaY</code></td><td>Movement since the previous delivery</td></tr>
-<tr><td><code>xVelocity</code> <code>yVelocity</code></td><td>Velocity in pixels per second</td></tr>
-<tr><td><code>startTime</code> <code>currentTime</code></td><td>Timestamps of the press and of this delivery</td></tr>
-<tr><td><code>button</code></td><td>A <code>Button</code> value</td></tr>
+<tr><td><code>x</code> <code>y</code></td><td><span class="status prot">Protected</span> <span class="status nr">Non-reactive</span> Current pointer position</td></tr>
+<tr><td><code>startX</code> <code>startY</code></td><td><span class="status prot">Protected</span> <span class="status nr">Non-reactive</span> Position at press</td></tr>
+<tr><td><code>lastX</code> <code>lastY</code></td><td><span class="status prot">Protected</span> <span class="status nr">Non-reactive</span> Position at the previous delivery</td></tr>
+<tr><td><code>deltaX</code> <code>deltaY</code></td><td><span class="status prot">Protected</span> <span class="status nr">Non-reactive</span> Movement since the previous delivery</td></tr>
+<tr><td><code>xVelocity</code> <code>yVelocity</code></td><td><span class="status prot">Protected</span> <span class="status nr">Non-reactive</span> Velocity in pixels per second</td></tr>
+<tr><td><code>startTime</code> <code>currentTime</code></td><td><span class="status prot">Protected</span> <span class="status nr">Non-reactive</span> Timestamps of the press and of this delivery</td></tr>
+<tr><td><code>button</code></td><td><span class="status prot">Protected</span> <span class="status nr">Non-reactive</span> A <code>Button</code> value</td></tr>
 </table></div>
-<p class="rule-p"><a class="rule" id="ev.payload.lifetime" href="#ev.payload.lifetime">ev.payload.lifetime</a>The payload is valid only during a pointer dispatch: <code>src</code> is cleared when the handler returns. In other handlers <code>src</code> is a different source — the <code>Motion</code> in a run's <code>@start</code>/<code>@complete</code>, the handler's own event object in <code>@if</code>, which has no pointer fields, and nothing in <code>@tick</code> or a timer's events.</p>
-<p class="rule-p"><a class="rule" id="ev.payload.nonreactive" href="#ev.payload.nonreactive">ev.payload.nonreactive</a>Payload properties are not reactive. An expression that reads them is not re-evaluated as the pointer moves.</p>
+<p class="rule-p"><a class="rule" id="ev.payload.lifetime" href="#ev.payload.lifetime">ev.payload.lifetime</a>The payload is valid only during a pointer dispatch: <code>src</code> is cleared when the handler returns. In other handlers <code>src</code> is a different source — the <code>Motion</code> in a run's <code>@start</code>/<code>@complete</code>, the handler's own event object in <code>@if</code>, which has no pointer fields, and nothing in <code>@tick</code> or a timer's events. <code>src</code> itself is <span class="status prot">Protected</span> <span class="status nr">Non-reactive</span>.</p>
+<p class="rule-p"><a class="rule" id="ev.payload.nonreactive" href="#ev.payload.nonreactive">ev.payload.nonreactive</a>Payload properties are Non-reactive (<a href="#eval.propclass">eval.propclass</a>). An expression that reads them is not re-evaluated as the pointer moves; read them in the handler.</p>
 <p class="rule-p"><a class="rule" id="ev.payload.velocity" href="#ev.payload.velocity">ev.payload.velocity</a>On <code>@release</code> the velocity is the drag's final sample. A flick keeps its last real sample; a pause before letting go reads zero.</p>
 <pre data-lang="abp"><code>Data: Nav
   page: 0
@@ -928,6 +1070,7 @@ Shape: ball
 
 <h2 id="type.font">Font</h2>
 <p>A typeface resource: one face file at one point size. Not viewable; it has no children. A <code>Text</code> refers to it through <code>font:</code>.</p>
+<p class="rule-p"><a class="rule" id="type.font.root" href="#type.font.root">type.font.root</a>Declare a <code>Font</code> only at the root level of a document, and give it a name no other <code>Font</code> in the design uses, imported files included.</p>
 <div class="tablewrap"><table>
 <tr><th>Property</th><th>Type</th><th>Default</th><th>Meaning</th></tr>
 <tr><td><code>path</code></td><td>string</td><td>—</td><td>Face file, relative to the entry document's directory. The file determines weight and style</td></tr>
@@ -962,33 +1105,34 @@ Shape: ball
 <div class="tablewrap"><table>
 <tr><th>Property</th><th>Type</th><th>Default</th><th>Meaning</th></tr>
 <tr><td><code>img</code></td><td>string</td><td>—</td><td>Picture path, relative to the entry document's directory: a <code>.png</code> or a <code>.svg</code></td></tr>
-<tr><td><code>borders</code></td><td>array</td><td><code>[0, 0, 0, 0]</code></td><td>Nine-slice insets in pixels, <code>[left, bottom, right, top]</code>. All zero disables nine-slice</td></tr>
+<tr><td><code>scaling</code></td><td>enum</td><td><code>Scaling::Scale</code></td><td>How the picture fills the <code>width</code> by <code>height</code> box (<a href="#type.image.size">below</a>)</td></tr>
+<tr><td><code>borders</code></td><td>array</td><td><code>0</code></td><td>Nine-slice insets in pixels: <code>[left, bottom, right, top]</code>, or one number for all four edges. All zero disables nine-slice</td></tr>
 </table></div>
 
 <h3 id="type.image.size">Sizing a picture</h3>
-<p class="rule-p"><a class="rule" id="type.image.natural" href="#type.image.natural">type.image.natural</a>A plain raster draws at its natural size. Setting <code>width</code>/<code>height</code> on an <code>Image</code> sets the component's box — its hit area, its layout basis, and the coordinate space of its children — and does not scale the pixels.</p>
-<p class="rule-p"><a class="rule" id="type.image.resize" href="#type.image.resize">type.image.resize</a>Three things resize the picture:</p>
-<ul>
-  <li><strong>Nine-slice.</strong> Once <code>borders</code> is non-zero, <code>width</code>/<code>height</code> size the picture: the corners hold and the edges and center stretch.</li>
-  <li><strong>A layout slot.</strong> An <code>Image</code> fills the box a layout computes for it (<a href="#layout.content">§12.7</a>).</li>
-  <li><strong><code>xScale</code>/<code>yScale</code></strong> (<a href="#view.appearance">§11.3</a>), which scale the picture and its children about <code>anchor</code>.</li>
-</ul>
-<p class="rule-p"><a class="rule" id="type.image.anchor" href="#type.image.anchor">type.image.anchor</a>An <code>Image</code> scales and rotates about its <code>anchor</code> only when its <code>width</code> and <code>height</code> are set. Without them it pivots about its bottom-left corner, whatever <code>anchor</code> says. Give an <code>Image</code> that rotates or scales its picture's size as <code>width</code>/<code>height</code>.</p>
+<p class="rule-p"><a class="rule" id="type.image.box" href="#type.image.box">type.image.box</a><code>width</code>/<code>height</code> are the picture's box, and <code>scaling</code> picks how the picture fills it:</p>
+<div class="tablewrap"><table>
+<tr><th><code>scaling</code></th><th>The picture is drawn</th></tr>
+<tr><td><code>Scaling::Scale</code> (default)</td><td><code>width</code> by <code>height</code>, each axis on its own</td></tr>
+<tr><td><code>Scaling::None</code></td><td>at its natural size</td></tr>
+<tr><td><code>Scaling::Aspect</code></td><td>at the largest uniform size that fits the box</td></tr>
+<tr><td><code>Scaling::X</code></td><td><code>width</code> wide; the height keeps the aspect ratio</td></tr>
+<tr><td><code>Scaling::Y</code></td><td><code>height</code> tall; the width keeps the aspect ratio</td></tr>
+</table></div>
+<p class="rule-p"><a class="rule" id="type.image.natural" href="#type.image.natural">type.image.natural</a>An axis with no size (unset, or below 1) keeps the picture's natural size, so an <code>Image</code> with no <code>width</code>/<code>height</code> draws its picture as the file has it.</p>
+<p class="rule-p"><a class="rule" id="type.image.center" href="#type.image.center">type.image.center</a>A picture that does not match its box is centered in it. <code>X</code> and <code>Y</code> can overflow the box on the free axis; <code>clip: true</code> crops to the box.</p>
+<p class="rule-p"><a class="rule" id="type.image.resize" href="#type.image.resize">type.image.resize</a>A nine-slice (<code>borders</code> non-zero) fits the same way, with its corners held while the edges and center stretch. In a layout slot the slot is the box (<a href="#layout.content">§12.7</a>). <code>scaling</code> fits the picture only; <code>scale</code> (<a href="#view.appearance">§11.3</a>) scales the whole component, children included, after the fit.</p>
 <pre data-lang="abp"><code>Image: panel                 # nine-slice: corners hold, center stretches
   img: "res/panel.png"
   width: 400
   height: 240
   borders: [8, 8, 8, 8]
 
-Image: thumb                 # a 512 px picture drawn 128 px wide
-  img: "res/photo-512.png"
-  x: 40
-  y: 40
-  width: 512                 # the picture's own size, so anchor applies
-  height: 512
-  anchor: [0, 0]             # keep the bottom-left corner at x/y
-  xScale: 0.25
-  yScale: 0.25</code></pre>
+Image: hero                  # a 400 x 300 picture
+  img: "res/hero.png"
+  width: 200
+  height: 200
+  scaling: Scaling::Aspect   # drawn 200 x 150, centered in the box</code></pre>
 
 <h3 id="type.image.mask">Grayscale PNGs are coverage masks</h3>
 <p class="rule-p"><a class="rule" id="type.image.grayscale" href="#type.image.grayscale">type.image.grayscale</a>A PNG with no color channels loads as an alpha raster and is drawn in the component's <code>fg</code>. In a gray-only file the gray value is the coverage, white being fully covered; in a gray-plus-alpha file the alpha channel is the coverage. Color PNGs draw as they are.</p>
@@ -1001,11 +1145,20 @@ Image: check
   fg: Theme.onPrimary          # the color it draws in</code></pre>
 
 <h3 id="type.image.svg">SVG pictures</h3>
-<p class="rule-p"><a class="rule" id="type.image.svgsize" href="#type.image.svgsize">type.image.svgsize</a>An <code>.svg</code> draws as anti-aliased vector art at the size the SVG declares (its <code>width</code>/<code>height</code>, else its <code>viewBox</code>). The sizing rules are those of a PNG: <code>width</code>/<code>height</code> do not scale it; <code>xScale</code>/<code>yScale</code> and a layout slot do, and it stays crisp.</p>
+<p class="rule-p"><a class="rule" id="type.image.svgsize" href="#type.image.svgsize">type.image.svgsize</a>An <code>.svg</code> draws as anti-aliased vector art at the size the SVG declares (its <code>width</code>/<code>height</code>, else its <code>viewBox</code>). The sizing rules are those of a PNG: <code>width</code>/<code>height</code> with <code>scaling</code>, <code>scale</code> and a layout slot all scale it, and it stays crisp.</p>
 <p class="rule-p"><a class="rule" id="type.image.svgcolor" href="#type.image.svgcolor">type.image.svgcolor</a><code>fg</code> replaces every stroke color and <code>bg</code> every fill color, including an <code>fg</code> inherited from an ancestor. Unset, the SVG draws its own colors.</p>
 <p class="rule-p"><a class="rule" id="type.image.svgborders" href="#type.image.svgborders">type.image.svgborders</a><code>borders</code> is ignored on an SVG, with one warning.</p>
 <p class="rule-p"><a class="rule" id="type.image.svgonly" href="#type.image.svgonly">type.image.svgonly</a>Only <code>Image</code> shows SVGs. A <code>Texture</code> source, or a texture named by a <code>Scene</code>'s <code>.a3d</code>, must be a bitmap; an SVG there is reported and samples nothing.</p>
-<p class="rule-p"><a class="rule" id="type.image.svgfeatures" href="#type.image.svgfeatures">type.image.svgfeatures</a>Unsupported SVG features are dropped with a warning naming them: <code>&lt;text&gt;</code>, <code>&lt;image&gt;</code>, <code>&lt;use&gt;</code>, <code>stroke-dasharray</code>, markers, and theme-object theming. Gradients keep at most 16 stops; more collapse to the first and last.</p>
+<p class="rule-p"><a class="rule" id="type.image.svgfeatures" href="#type.image.svgfeatures">type.image.svgfeatures</a>Unsupported SVG features are dropped with a warning naming them: <code>&lt;text&gt;</code>, <code>&lt;image&gt;</code>, <code>&lt;use&gt;</code>, <code>stroke-dasharray</code>, markers, and theme-object theming. Some of them change the picture:</p>
+<ul>
+<li><code>&lt;style&gt;</code> and <code>class</code>: a shape styled only through a class fills black. Put the style on the element instead, as <code>style="fill:…"</code>.</li>
+<li><code>clip-path</code>: the shape draws unclipped.</li>
+<li><code>visibility</code>: the element draws. Hide it with <code>display="none"</code>.</li>
+<li><code>spreadMethod="reflect"</code> and <code>"repeat"</code>: the gradient pads.</li>
+<li>A colour written as <code>rgba()</code>, <code>hsl()</code>, <code>hsla()</code> or <code>currentColor</code>, or a name that does not resolve, draws grey (<code>#808080</code>). Write it as <code>#hex</code> or <code>rgb()</code>, with <code>fill-opacity</code> or <code>stroke-opacity</code> for transparency.</li>
+</ul>
+<p class="rule-p">Gradients keep at most 16 stops; more collapse to the first and last.</p>
+<p class="rule-p"><a class="rule" id="type.image.svglimits" href="#type.image.svglimits">type.image.svglimits</a>Two SVG effects are approximated. A stroke under a non-uniform scale draws at one width, the average of the two scales, where SVG draws it wider along the stretched axis. That covers a <code>transform</code> such as <code>scale(3, 1)</code> inside the SVG, and an Image fitted to a box of another aspect ratio. Group <code>opacity</code> applies to each child of the group on its own, so overlapping children show through each other instead of fading as one.</p>
 <pre data-lang="abp"><code>Data: Theme
   onSurface: "#E6EDF3"
 
@@ -1020,7 +1173,7 @@ Image: wifi
 <tr><td><code>text</code></td><td>string</td><td>—</td><td>The string. A number renders as its string form</td></tr>
 <tr><td><code>lines</code></td><td>unsigned</td><td>1</td><td><code>1</code> single line; <code>0</code> multi-line, unlimited; greater than 1 multi-line (the number is not a cap)</td></tr>
 <tr><td><code>font</code></td><td>object</td><td>default face</td><td>A <code>Font</code></td></tr>
-<tr><td><code>justify</code></td><td>enum</td><td><code>Justify::Left</code></td><td>Horizontal placement in the <code>width</code> box: <code>::Left</code> <code>::Right</code> <code>::Center</code> <code>::LeftSib</code></td></tr>
+<tr><td><code>justify</code></td><td>enum</td><td><code>Justify::None</code></td><td>Horizontal placement in the <code>width</code> box: <code>::None</code> <code>::Left</code> <code>::Right</code> <code>::Center</code></td></tr>
 <tr><td><code>maxChars</code></td><td>unsigned</td><td>—</td><td>Character limit: truncation width (single line) or wrap width (multi-line). Unset, the limit is <code>width</code> in pixels; with no <code>width</code> either, there is no limit</td></tr>
 <tr><td><code>truncate</code></td><td>enum</td><td><code>Truncate::None</code></td><td>Single-line overflow: <code>::None</code> <code>::Clip</code> <code>::ElideEnd</code> <code>::ElideStart</code> <code>::ElideCenter</code></td></tr>
 <tr><td><code>elideText</code></td><td>string</td><td><code>…</code></td><td>Elision marker; its first character replaces the default</td></tr>
@@ -1029,12 +1182,12 @@ Image: wifi
 <tr><td><code>align</code></td><td>enum</td><td>—</td><td><code>Align::Top</code> <code>::Center</code> <code>::Bottom</code>. Stored; no effect in this version</td></tr>
 <tr><td><code>wrapText</code></td><td>string</td><td>—</td><td>Wrap marker. Stored; no effect in this version</td></tr>
 </table></div>
-<p class="rule-p"><a class="rule" id="type.text.justify" href="#type.text.justify">type.text.justify</a><code>Justify::Left</code> starts the text at <code>x</code> with each character at its own offset. <code>Justify::LeftSib</code> puts the first character's ink, stroke included, on the box's left edge. <code>Center</code> and <code>Right</code> place the text within <code>width</code>.</p>
+<p class="rule-p"><a class="rule" id="type.text.justify" href="#type.text.justify">type.text.justify</a><code>Justify::None</code>, the default, starts the text at <code>x</code> with each character at its own offset, and keeps the offset the last mode gave it: changing the font (stroke, point size or face) doesn't move the text. <code>Justify::Left</code> puts the first character's ink, stroke included, on the box's left edge. Outside a layout, <code>Center</code> and <code>Right</code> place the text within <code>width</code> (<a href="#type.text.layout">type.text.layout</a>).</p>
 <p class="rule-p"><a class="rule" id="type.text.lines" href="#type.text.lines">type.text.lines</a>Single-line text keeps an embedded <code>\n</code> on one line. Multi-line text breaks at every <code>\n</code> regardless of <code>wrap</code>. Truncation applies to single-line text only; wrapping to multi-line text only.</p>
 <p class="rule-p"><a class="rule" id="type.text.color" href="#type.text.color">type.text.color</a>Text color is the inherited <code>fg</code> (<a href="#view.appearance">§11.3</a>). There is no Text-specific color property. With a stroked font, <code>fg</code> is the stroke color and <code>bg</code> the fill color (<a href="#type.font.stroke">type.font.stroke</a>).</p>
 <p class="rule-p"><a class="rule" id="type.text.measure" href="#type.text.measure">type.text.measure</a>Text is not measured. A Text's <code>width</code> and <code>height</code> are the box the author sets, not the size of the string, and no property reports the measured extent. To center a label, give it a <code>width</code> and <code>justify: Justify::Center</code>.</p>
 <p class="rule-p"><a class="rule" id="type.text.baseline" href="#type.text.baseline">type.text.baseline</a><code>y</code> is the bottom of the line box, not the baseline; the baseline sits one font descent above it. <code>pointSize</code> is in points of 4⁄3 px, so glyphs are a third taller in pixels than the number suggests.</p>
-<p class="rule-p"><a class="rule" id="type.text.layout" href="#type.text.layout">type.text.layout</a>Inside a layout, a Text that wraps or truncates at its <code>width</code> (no <code>maxChars</code>) follows the box the layout gives it: when the box is narrower, multi-line text wraps and single-line text clips or elides at the box. <code>width</code> remains the maximum; a wider box leaves the text at <code>width</code>, and a short string keeps its natural width. A Text with no limit, or a <code>maxChars</code> limit, does not change. The glyphs are never scaled to a grown box.</p>
+<p class="rule-p"><a class="rule" id="type.text.layout" href="#type.text.layout">type.text.layout</a>Inside a layout, a Text that wraps or truncates at its <code>width</code> (no <code>maxChars</code>) follows the box the layout gives it: when the box is narrower, multi-line text wraps and single-line text clips or elides at the box. <code>width</code> remains the maximum; a wider box leaves the text at <code>width</code>, and a short string keeps its natural width. A Text with no limit, or a <code>maxChars</code> limit, does not change. The glyphs are never scaled to a grown box. <code>justify</code> has no effect on a Text placed by a layout: the text starts at the box's left edge. To centre a Text in a layout, centre it with its container's <code>justifyContent</code>.</p>
 <pre data-lang="abp"><code>Text: readout
   text: Vehicle.speed
   font: BigFont
@@ -1188,8 +1341,8 @@ Stamp: boxAgain                 # the same objects, drawn again here
 <tr><th>Property</th><th>Type</th><th>Default</th><th>Meaning</th></tr>
 <tr><td><code>period</code></td><td>unsigned</td><td>100</td><td>Milliseconds</td></tr>
 <tr><td><code>repeats</code></td><td>bool</td><td>false</td><td>Reset and run again on expiry</td></tr>
-<tr><td><code>active</code></td><td>bool</td><td>false</td><td><span class="status ro">Read-only</span> Whether it is running</td></tr>
-<tr><td><code>remaining</code></td><td>unsigned</td><td>0</td><td><span class="status ro">Read-only</span> Milliseconds left</td></tr>
+<tr><td><code>active</code></td><td>bool</td><td>false</td><td><span class="status prot">Protected</span> Whether it is running</td></tr>
+<tr><td><code>remaining</code></td><td>unsigned</td><td>0</td><td><span class="status prot">Protected</span> Milliseconds left</td></tr>
 </table></div>
 <p class="rule-p"><a class="rule" id="type.timer.start" href="#type.timer.start">type.timer.start</a>A timer does nothing until it is started, with the <code>start</code> action or <code>timer.start()</code> — often from its own <code>@init</code>.</p>
 <p class="rule-p"><a class="rule" id="type.timer.complete" href="#type.timer.complete">type.timer.complete</a><code>@complete</code> is the period event: it fires on expiry, and with <code>repeats: true</code> the timer then resets and runs again. <code>@start</code> fires when it starts or restarts, and again each time a repeating timer begins another period.</p>
@@ -1262,7 +1415,7 @@ Text: speedReadout
   height: 100
   clip: true
   clipRect: [0, 0, 120, 100]     # left 120 px visible, children clipped with it</code></pre>
-<p class="rule-p"><a class="rule" id="view.geometry.layout" href="#view.geometry.layout">view.geometry.layout</a>Inside a layout, <code>x</code>, <code>y</code>, <code>width</code> and <code>height</code> stop applying, and so do <code>rotate</code>, <code>xScale</code>, <code>yScale</code> and <code>corners</code>: a laid-out component takes its position and size from the arrangement (<a href="#layout">chapter 12</a>).</p>
+<p class="rule-p"><a class="rule" id="view.geometry.layout" href="#view.geometry.layout">view.geometry.layout</a>Inside a layout, <code>x</code>, <code>y</code>, <code>width</code> and <code>height</code> stop applying, and so do <code>rotate</code>, <code>scale</code> and <code>corners</code>: a laid-out component takes its position and size from the arrangement (<a href="#layout">chapter 12</a>).</p>
 
 <h2 id="view.display">Display mapping</h2>
 <div class="tablewrap"><table>
@@ -1274,12 +1427,12 @@ Text: speedReadout
 <h2 id="view.appearance">Appearance</h2>
 <div class="tablewrap"><table>
 <tr><th>Property</th><th>Type</th><th>Default</th><th>Meaning</th></tr>
-<tr><td><code>visible</code></td><td>bool</td><td>true</td><td>Draw the object and its children</td></tr>
+<tr><td><code>visible</code></td><td>bool</td><td>true</td><td>Draw the object and its children. A hidden object takes no pointer input (<a href="#ev.pointer.overlap">ev.pointer.overlap</a>)</td></tr>
 <tr><td><code>enabled</code></td><td>bool</td><td>true</td><td>False makes the object transparent to input and stops its <code>@tick</code>; a change of value fires <code>@enable</code>/<code>@disable</code></td></tr>
-<tr><td><code>alpha</code></td><td>0–255</td><td>255</td><td>Opacity; inherited by children</td></tr>
+<tr><td><code>alpha</code></td><td>0–255</td><td>255</td><td>Opacity; inherited by children. It does not affect input: an object at <code>alpha</code> 0 still takes presses (<a href="#ev.pointer.overlap">ev.pointer.overlap</a>)</td></tr>
 <tr><td><code>fg</code></td><td>color</td><td>inherited</td><td>Foreground: text color, solid fill color, Shape <strong>outline</strong>, grayscale-PNG tint, SVG stroke</td></tr>
 <tr><td><code>bg</code></td><td>color</td><td>inherited</td><td>Background: Shape <strong>fill</strong>, SVG fill, stroked-font glyph fill</td></tr>
-<tr><td><code>xScale</code> <code>yScale</code></td><td>real</td><td>1.0</td><td>Scale factors about <code>anchor</code></td></tr>
+<tr><td><code>scale</code></td><td>array</td><td><code>[1.0, 1.0]</code></td><td>Scale factors <code>[sx, sy]</code> about <code>anchor</code>; <code>[-1, 1]</code> mirrors. Anything but an array of two counts as <code>[1, 1]</code></td></tr>
 <tr><td><code>rotate</code></td><td>real</td><td>0</td><td>Degrees, counterclockwise, about <code>anchor</code></td></tr>
 <tr><td><code>anchor</code></td><td>array</td><td><code>[0.5, 0.5]</code></td><td>Pivot <code>[ax, ay]</code> as a fraction of the object's authored bounds</td></tr>
 <tr><td><code>corners</code></td><td>array</td><td>—</td><td>Non-affine quad warp: four normalized <code>[x, y]</code> pairs in BL, BR, TR, TL order. Unset or invalid is affine</td></tr>
@@ -1294,7 +1447,7 @@ Text: speedReadout
 </table></div>
 
 <h3 id="view.anchor">Anchor</h3>
-<p class="rule-p"><a class="rule" id="view.anchor.bounds" href="#view.anchor.bounds">view.anchor.bounds</a><code>anchor</code> is a UV position over the object's authored bounds. For a <code>Component</code> the bounds are the union of its children's bounds and its own box from its origin to (<code>width</code>, <code>height</code>), so the origin is always inside them. One anchor serves both scaling and rotation. An <code>Image</code> honors <code>anchor</code> only when its <code>width</code> and <code>height</code> are set (<a href="#type.image.anchor">type.image.anchor</a>).</p>
+<p class="rule-p"><a class="rule" id="view.anchor.bounds" href="#view.anchor.bounds">view.anchor.bounds</a><code>anchor</code> is a UV position over the object's authored bounds. For a <code>Component</code> the bounds are the union of its children's bounds and its own box from its origin to (<code>width</code>, <code>height</code>), so the origin is always inside them. A buffered, blurred or masked component whose effect box (<a href="#view.effects.size">view.effects.size</a>) comes from its <code>width</code> and <code>height</code> or from a layout has that box as its bounds; one whose box follows its contents keeps its children's bounds. A component that holds one counts those bounds. While the contents fit inside the box, switching the effect on or off leaves the pivot where it is; content the box clips is outside the bounds while the effect is on, so the pivot moves with the toggle. One anchor serves both scaling and rotation.</p>
 <p class="rule-p"><a class="rule" id="view.anchor.outside" href="#view.anchor.outside">view.anchor.outside</a>Values outside 0–1 place the pivot outside the bounds; this is how an object orbits or sweeps about an external point. Where the pivot must be exact, set <code>width</code>/<code>height</code> so the bounds are deterministic.</p>
 <pre data-lang="abp"><code>Data: App
   dimmed: true
@@ -1302,20 +1455,21 @@ Text: speedReadout
 Component: spotlight
   x: 100
   y: 100
-  width: 200                # blur, like buffer, needs a size
+  width: 200                # the blurred box
   height: 120
+  rotate: 10                # about the bottom edge's middle, blur on or off
+  anchor: [0.5, 0]
   blur: App.dimmed
   blurRadius: [6, 6]
   fg: "#66CCFF"</code></pre>
 
 <h3 id="view.effects">Buffer, blur and mask</h3>
-<p class="rule-p"><a class="rule" id="view.buffer.size" href="#view.buffer.size">view.buffer.size</a><code>buffer</code> caches the subtree as an image. It looks the same as drawing directly, and content changes update the cache automatically. A buffered component, like a blurred one, needs its own <code>width</code> and <code>height</code>; <strong>without them it draws nothing</strong>.</p>
-<p class="rule-p"><a class="rule" id="view.mask.def" href="#view.mask.def">view.mask.def</a><code>mask</code> names another component whose alpha coverage stencils this one: only the parts the source covers are drawn. Any viewable may be a source. Only the overlap with this component's own box counts. The source keeps its own place, may mask several components, and the mask follows it when it changes or moves.</p>
+<p class="rule-p"><a class="rule" id="view.buffer.size" href="#view.buffer.size">view.buffer.size</a><code>buffer</code> caches the subtree as an image. It looks the same as drawing directly, and content changes update the cache automatically.</p>
+<p class="rule-p"><a class="rule" id="view.effects.size" href="#view.effects.size">view.effects.size</a>A buffered, blurred or masked component draws inside a box, sized like any component with a size of its own. The box comes from, in order: a layout (the box a parent layout gives it, or its own Layout's <code>flexWidth</code> and <code>flexHeight</code>); then its <code>width</code> and <code>height</code>, when both are set; otherwise its contents. Contents are measured in the component's own coordinates, so its <code>rotate</code> and <code>scale</code> turn and scale the box with them and never change its size. The box follows changes to any of them, and content outside it is clipped. A box that follows its contents starts at the component's origin, so content left of or below it is clipped too.</p>
+<p class="rule-p"><a class="rule" id="view.mask.def" href="#view.mask.def">view.mask.def</a><code>mask</code> names another component whose alpha coverage stencils this one: only the parts the source covers are drawn. Any viewable may be a source. Only the overlap with this component's own box counts. The source keeps its own place, may mask several components, and the mask follows it when it changes or moves. <code>mask: false</code>, or no <code>mask</code> at all, leaves a plain component that <code>blur</code> or <code>buffer</code> can use, so a binding such as <code>mask: on ? stencil : false</code> switches the mask off and on; a <code>mask</code> that names no valid component, or <code>maskMode: MaskMode::None</code>, keeps the mask and draws the content unmasked.</p>
 <p class="rule-p"><a class="rule" id="view.mask.mode" href="#view.mask.mode">view.mask.mode</a><code>MaskMode::Normal</code> shows content where the source is opaque; <code>::Invert</code> where it is transparent; <code>::None</code> disables the coverage.</p>
 <p class="rule-p"><a class="rule" id="view.mask.hide" href="#view.mask.hide">view.mask.hide</a><code>maskHideSource: true</code> stops the source drawing on its own, making it a coverage-only stencil. This is the only way to hide a stencil: <code>visible: false</code> on the source makes it stencil nothing. The setting on any component the source masks hides the source for all of them, so set and clear it on the same component.</p>
 <p class="rule-p"><a class="rule" id="view.effects.exclusive" href="#view.effects.exclusive">view.effects.exclusive</a><code>buffer</code>, <code>blur</code> and <code>mask</code> are mutually exclusive on one component. If more than one is present when the component first renders, the priority is <code>mask</code> &gt; <code>blur</code> &gt; <code>buffer</code>. Afterwards, whichever is applied first holds the component, and the others take effect only once it is cleared; clearing falls through to the highest-priority remaining effect.</p>
-
-<p class="rule-p"><a class="rule" id="view.blur.anchor" href="#view.blur.anchor">view.blur.anchor</a>While <code>blur</code> is on, a component rotates and scales about its own origin and ignores <code>anchor</code>. A blurred component that is also rotated or scaled therefore jumps when <code>blur</code> toggles. Avoid combining <code>blur</code> with <code>rotate</code>, <code>xScale</code> or <code>yScale</code> about a non-origin anchor in this version.</p>
 
 <h3 id="view.colors">Color values</h3>
 <p class="rule-p"><a class="rule" id="view.color.forms" href="#view.color.forms">view.color.forms</a>A color may be written in any of these forms:</p>
@@ -1410,9 +1564,14 @@ Component: bar
 <tr><td><code>"&lt;n&gt;%"</code></td><td><code>"50%"</code></td><td>Percent of the parent's dimension</td></tr>
 <tr><td><code>"auto"</code></td><td><code>"auto"</code></td><td>Size from content</td></tr>
 </table></div>
+<p>On a margin, <code>"auto"</code> takes the free space on that edge instead: <code>marginLeft: "auto"</code> pushes the item to the far end, and auto on both sides of an axis centres it. <code>margin: "auto"</code> sets all four edges, and an edge given its own value (<code>marginLeft: 8</code>) keeps it.</p>
 <p class="rule-p"><a class="rule" id="layout.noshorthand" href="#layout.noshorthand">layout.noshorthand</a>There is no multi-value shorthand: <code>padding: "10 20"</code> is malformed. Use the per-edge properties.</p>
-<p class="rule-p"><a class="rule" id="layout.clear" href="#layout.clear">layout.clear</a>Removing a layout property returns that member to its default. An empty value clears the property.</p>
-<p class="rule-p"><a class="rule" id="layout.reject" href="#layout.reject">layout.reject</a>A malformed or out-of-range value — <code>"12qx"</code>, a negative <code>flexGrow</code>, <code>aspectRatio: 0</code>, <code>alignItems: FlexAlign::SpaceBetween</code> — is rejected <strong>silently</strong>: the previous value stands and no diagnostic is reported.</p>
+<p class="rule-p"><a class="rule" id="layout.clear" href="#layout.clear">layout.clear</a>Removing a layout property returns that member to its default. An empty value (nothing after the colon, or <code>""</code>) clears the property.</p>
+<p class="rule-p"><a class="rule" id="layout.reject" href="#layout.reject">layout.reject</a>A malformed or out-of-range value — <code>"12qx"</code>, a quoted enumeration value such as <code>flexDirection: "Row"</code>, a negative <code>flexGrow</code>, <code>aspectRatio: 0</code>, <code>alignItems: FlexAlign::SpaceBetween</code> or <code>FlexAlign::Auto</code> — is rejected <strong>silently</strong>: the previous value stands and no diagnostic is reported.</p>
+<p class="rule-p"><a class="rule" id="layout.margin.auto" href="#layout.margin.auto">layout.margin.auto</a>An auto margin on the cross axis (top or bottom in a row, left or right in a column) does not work beside the default <code>alignItems: FlexAlign::Stretch</code>: the item is not laid out. Give the item <code>alignSelf: FlexAlign::FlexStart</code>, or give the parent an <code>alignItems</code> other than Stretch. That includes <code>margin: "auto"</code>, which sets both cross-axis edges.</p>
+<pre data-lang="abp"><code>Layout: Lcentered
+  margin: "auto"
+  alignSelf: FlexAlign::FlexStart</code></pre>
 
 <h2 id="layout.sizing">Sizing inside a layout</h2>
 <p class="rule-p"><a class="rule" id="layout.sizing.flex" href="#layout.sizing.flex">layout.sizing.flex</a>A laid-out component's own <code>width</code>/<code>height</code> do not size it in the flow. Its size comes from its content, from <code>flexWidth</code>/<code>flexHeight</code>, or from <code>flexGrow</code>. The outermost laid-out component keeps its <code>x</code>/<code>y</code> for placement; every component inside it takes both position and size from the layout.</p>
@@ -1445,7 +1604,7 @@ Component: shelf
     img: "res/c.png"</code></pre>
 
 <h2 id="layout.content">Content follows the box</h2>
-<p class="rule-p"><a class="rule" id="layout.content.image" href="#layout.content.image">layout.content.image</a>When a layout gives an <code>Image</code> a box larger than its picture, the picture fills the box; a nine-slice keeps its borders and stretches its center.</p>
+<p class="rule-p"><a class="rule" id="layout.content.image" href="#layout.content.image">layout.content.image</a>When a layout gives an <code>Image</code> a box larger than its picture, its <code>scaling</code> (<a href="#type.image.box">type.image.box</a>) decides how the picture uses it: <code>Scaling::Scale</code>, the default, fills the box, and a nine-slice keeps its borders and stretches its center. On an axis its Layout leaves unset, an <code>Image</code> lays out at its own size: its <code>width</code> or <code>height</code>, otherwise its picture's, a nine-slice included. To fill the row's height, give it <code>flexHeight: "100%"</code>.</p>
 <p class="rule-p"><a class="rule" id="layout.content.text" href="#layout.content.text">layout.content.text</a><code>Text</code> is the exception: its box grows but its glyphs keep their natural size. A box narrower than the text wraps or elides a Text that has a width limit (<a href="#type.text.layout">§10.6</a>).</p>
 
 <h2 id="layout.displaynone">Removing an item from the flow</h2>
@@ -1525,7 +1684,7 @@ Component: panel
   @init:
     start: slideIn</code></pre>
 <p class="rule-p"><a class="rule" id="motion.step.seq" href="#motion.step.seq">motion.step.seq</a>Steps run in order. A Step ends when none of its operations still holds it open; the next Step then starts. No operation writes past its own Step, so a <code>Spring</code> that should keep settling while something else happens belongs in the same Step as that thing.</p>
-<p class="rule-p"><a class="rule" id="motion.guard" href="#motion.guard">motion.guard</a>Steps and operations have no names. Their value position is an optional guard, evaluated each time the Step or operation arms: a false Step guard skips the whole Step; a false operation guard skips that operation while its siblings run. An empty value always runs. <code>enabled: false</code> on a Step or operation skips it in the same way.</p>
+<p class="rule-p"><a class="rule" id="motion.guard" href="#motion.guard">motion.guard</a>Steps and operations have no names. Their value position is an optional guard, evaluated each time the Step or operation arms: a false Step guard skips the whole Step; a false operation guard skips that operation while its siblings run. An empty value always runs. <code>enabled: false</code> on a Step or operation skips it in the same way. A guard reads values as they are when it arms, and so do an operation's <code>to:</code> and <code>from:</code>. A <code>Motion</code> started by a handler arms its first Step at once, so these read a property computed from that handler's writes before it is updated (<a href="#eval.handlers.reads">§7.1</a>). A false guard skips its Step or operation for the whole run, and <code>to:</code> and <code>from:</code> keep the old value for the whole run. Have them read the value the handler writes instead. A later Step arms after the update and reads the new value.</p>
 
 <h2 id="motion.props">Motion properties</h2>
 <div class="tablewrap"><table>
@@ -1533,18 +1692,19 @@ Component: panel
 <tr><td><code>repeat</code></td><td>signed</td><td>Extra iterations of the whole program. Any negative value repeats forever</td></tr>
 <tr><td><code>repeatType</code></td><td>enum</td><td><code>RepeatType::Loop</code> (default) restarts; <code>::Reverse</code> alternates direction and plays curves backward; <code>::Mirror</code> swaps start and end and plays curves forward</td></tr>
 <tr><td><code>repeatDelay</code></td><td>unsigned</td><td>Milliseconds between iterations</td></tr>
-<tr><td><code>running</code></td><td>unsigned</td><td><span class="status ro">Read-only</span> Number of live runs</td></tr>
-<tr><td><code>time</code></td><td>unsigned</td><td><span class="status ro">Read-only</span> Milliseconds into the current run</td></tr>
-<tr><td><code>step</code></td><td>unsigned</td><td><span class="status ro">Read-only</span> Current Step index</td></tr>
+<tr><td><code>running</code></td><td>unsigned</td><td><span class="status prot">Protected</span> Number of live runs</td></tr>
+<tr><td><code>time</code></td><td>unsigned</td><td><span class="status prot">Protected</span> <span class="status nr">Non-reactive</span> Milliseconds into the current run</td></tr>
+<tr><td><code>step</code></td><td>unsigned</td><td><span class="status prot">Protected</span> <span class="status nr">Non-reactive</span> Current Step index</td></tr>
 </table></div>
+<p class="rule-p"><a class="rule" id="motion.props.position" href="#motion.props.position">motion.props.position</a><code>time</code> and <code>step</code> are the current run's position. With several runs live they have no single value outside a run, so they are Non-reactive: a binding that reads them is not re-evaluated as the run moves. Read them in a handler or <code>@tick</code>.</p>
 <p class="rule-p"><a class="rule" id="motion.userprops" href="#motion.userprops">motion.userprops</a>User properties are allowed on a Motion and are how a handler passes a value in (<code>fling.v = src.xVelocity</code>, then <code>velocity: v</code> in an operation). An operation's own property names come first in its scope, so a user property must not share a name with an operation property. <span class="status nd">Not diagnosed</span></p>
 
 <h2 id="motion.target">The target</h2>
 <p class="rule-p"><a class="rule" id="motion.target.owner" href="#motion.target.owner">motion.target.owner</a>The target of a run is the owner of the handler that starts it. <code>start: slideIn</code> inside <code>panel</code>'s handler runs the Motion on <code>panel</code>. A handler on a child animates the child, not the component around it.</p>
-<p class="rule-p"><a class="rule" id="motion.target.name" href="#motion.target.name">motion.target.name</a>Inside an operation, <code>target</code> names the run's target: <code>out: target.x</code> is this run's target's <code>x</code>.</p>
+<p class="rule-p"><a class="rule" id="motion.target.name" href="#motion.target.name">motion.target.name</a>Inside an operation, <code>target</code> names the run's target: <code>out: target.x</code> is this run's target's <code>x</code>. <code>target</code> is <span class="status prot">Protected</span> <span class="status nr">Non-reactive</span>.</p>
 <p class="rule-p"><a class="rule" id="motion.target.explicit" href="#motion.target.explicit">motion.target.explicit</a>To animate another object, name it in an action call: <code>code: slideIn.start(panel)</code>, or <code>code: grow.start(parent)</code> from a child's handler. Alternatively, have that object watch state with <code>@if</code> and start the Motion on itself.</p>
-<p class="rule-p"><a class="rule" id="motion.target.declared" href="#motion.target.declared">motion.target.declared</a>A Motion drives only properties the target declares. An operation whose <code>out</code> names an undeclared property writes nothing, silently — built-ins such as <code>x</code>, <code>alpha</code> and <code>xScale</code> included. Declare each driven property on the target, at its default.</p>
-<p class="rule-p"><a class="rule" id="motion.target.element" href="#motion.target.element">motion.target.element</a><code>out</code> cannot address one element of an array property (<code>out: card.clipRect[2]</code> writes nothing). Animate a scalar that the array's element expression reads instead.</p>
+<p class="rule-p"><a class="rule" id="motion.target.declared" href="#motion.target.declared">motion.target.declared</a>A Motion drives only properties the target declares. An operation whose <code>out</code> names an undeclared property writes nothing — built-ins such as <code>x</code>, <code>alpha</code> and <code>scale</code> included — and the run logs <code>motion: `out` names no property</code> when it starts. Declare each driven property on the target, at its default. The same happens when <code>out</code> names a child of the target (<code>out: target.icon.x</code>): a chain through <code>target</code> reaches the target's properties only (<a href="#decl.children.viaprop">decl.children.viaprop</a>). To animate a child, start the Motion on the child itself, or drive a property of the target that the child reads.</p>
+<p class="rule-p"><a class="rule" id="motion.target.element" href="#motion.target.element">motion.target.element</a><code>out</code> can name one element of an array property, by index or by name: <code>out: target.scale[0]</code>, <code>out: target.pair.a</code>. On a Set, Tween or Spring, an array named whole (<code>out: target.scale</code>) or a list of references (<code>out: [target.x, target.y]</code>) drives every element on one clock.</p>
 
 <h2 id="motion.verbs">Verbs and events</h2>
 <div class="tablewrap"><table>
@@ -1568,22 +1728,22 @@ Component: panel
 <tr><td><code>Spring</code></td><td>Damped-oscillator approach to <code>to</code>, or a fling projected from <code>velocity</code> (<a href="#motion.spring">§13.8</a>)</td></tr>
 <tr><td><code>Wait</code></td><td>Holds its Step open for <code>duration</code>, or while <code>until</code> is false</td></tr>
 </table></div>
-<p class="rule-p"><a class="rule" id="motion.ops.props" href="#motion.ops.props">motion.ops.props</a>Operation properties are listed below. A property that does not apply to its operation is accepted without a diagnostic and ignored.</p>
+<p class="rule-p"><a class="rule" id="motion.ops.props" href="#motion.ops.props">motion.ops.props</a>Operation properties are listed below. A property that does not apply to its operation is accepted without a diagnostic and ignored. Every operation property is Read-only (<a href="#eval.propclass">eval.propclass</a>): the operation reads it when it uses it, <code>to</code> when its Step starts and <code>until</code> or <code>held</code> while it runs, not when something it reads changes.</p>
 <div class="tablewrap"><table>
 <tr><th>Property</th><th>Applies to</th><th>Meaning</th></tr>
-<tr><td><code>out</code></td><td>Set Tween Path Spring</td><td>The driven property, e.g. <code>target.x</code>. On a Path, an array: <code>[target.x, target.y]</code></td></tr>
-<tr><td><code>from</code></td><td>Tween Spring</td><td>Start value. Default: the property's current value, so an interrupted run continues rather than snapping</td></tr>
-<tr><td><code>to</code></td><td>Set Tween Spring</td><td>End value, read when the Step starts. Optional on a Spring</td></tr>
-<tr><td><code>duration</code></td><td>Tween Path Spring Wait</td><td>Milliseconds. Defaults: Tween 300, Path 300, Spring 800, Wait 0. On a Path, duration mode is the default; <code>speed</code>, <code>drive</code> or <code>decay</code> overrides it</td></tr>
-<tr><td><code>delay</code></td><td>All</td><td>Milliseconds after the Step starts before this operation begins</td></tr>
-<tr><td><code>ease</code></td><td>Tween Path</td><td>An <code>Ease</code> value or a points curve (<a href="#motion.easing">§13.6</a>)</td></tr>
-<tr><td><code>round</code></td><td>Set Tween Path Spring</td><td>How a real result lands in an integer property: <code>Round::None</code> (default) <code>::Round</code> <code>::Up</code> <code>::Down</code>; per dimension on a Path</td></tr>
-<tr><td><code>repeat</code> <code>repeatType</code> <code>repeatDelay</code></td><td>Tween Path Spring Wait</td><td>As on Motion, per operation. A speed-mode Path repeats only while it cruises at <code>speed</code>; a driven (<code>drive</code>) or coasting (<code>decay</code>) Path does not repeat</td></tr>
-<tr><td><code>until</code></td><td>Wait</td><td>Hold while false. Set <code>until</code> or <code>duration</code>, not both</td></tr>
-<tr><td><code>bounce</code></td><td>Spring</td><td>0 is critically damped, up to 0.95 very bouncy. Default 0.25</td></tr>
-<tr><td><code>stiffness</code> <code>damping</code> <code>mass</code></td><td>Spring</td><td>Physics form; writing any one selects it. Defaults 100, 10, 1</td></tr>
-<tr><td><code>velocity</code></td><td>Spring</td><td>Initial velocity in units per second</td></tr>
-<tr><td><code>power</code> <code>snap</code> <code>min</code> <code>max</code></td><td>Spring</td><td>Where a spring with no <code>to</code> settles. <code>min</code> and <code>max</code> also clamp an authored <code>to</code></td></tr>
+<tr><td><code>out</code></td><td>Set Tween Path Spring</td><td><span class="status ro">Read-only</span> The driven property, e.g. <code>target.x</code>. On a Set, Tween or Spring, a whole array (<code>target.scale</code>) or a list (<code>[target.x, target.y]</code>) drives every element. On a Path, a list: <code>[target.x, target.y]</code></td></tr>
+<tr><td><code>from</code></td><td>Tween Spring</td><td><span class="status ro">Read-only</span> Start value; an array gives each element its own. Default: the property's current value, so an interrupted run continues rather than snapping</td></tr>
+<tr><td><code>to</code></td><td>Set Tween Spring</td><td><span class="status ro">Read-only</span> End value, read when the Step starts. With several elements, an array is per element and a number applies to all. Optional on a Spring</td></tr>
+<tr><td><code>duration</code></td><td>Tween Path Spring Wait</td><td><span class="status ro">Read-only</span> Milliseconds. Defaults: Tween 300, Path 300, Spring 800, Wait 0. On a Path, duration mode is the default; <code>speed</code>, <code>drive</code> or <code>decay</code> overrides it</td></tr>
+<tr><td><code>delay</code></td><td>All</td><td><span class="status ro">Read-only</span> Milliseconds after the Step starts before this operation begins</td></tr>
+<tr><td><code>ease</code></td><td>Tween Path</td><td><span class="status ro">Read-only</span> An <code>Ease</code> value or a points curve (<a href="#motion.easing">§13.6</a>)</td></tr>
+<tr><td><code>round</code></td><td>Set Tween Path Spring</td><td><span class="status ro">Read-only</span> How a real result lands in an integer property: <code>Round::None</code> (default) <code>::Round</code> <code>::Up</code> <code>::Down</code>; per dimension on a Path</td></tr>
+<tr><td><code>repeat</code> <code>repeatType</code> <code>repeatDelay</code></td><td>Tween Path Spring Wait</td><td><span class="status ro">Read-only</span> As on Motion, per operation. A speed-mode Path repeats only while it cruises at <code>speed</code>; a driven (<code>drive</code>) or coasting (<code>decay</code>) Path does not repeat</td></tr>
+<tr><td><code>until</code></td><td>Wait</td><td><span class="status ro">Read-only</span> Hold while false. Set <code>until</code> or <code>duration</code>, not both</td></tr>
+<tr><td><code>bounce</code></td><td>Spring</td><td><span class="status ro">Read-only</span> 0 is critically damped, up to 0.95 very bouncy. Default 0.25</td></tr>
+<tr><td><code>stiffness</code> <code>damping</code> <code>mass</code></td><td>Spring</td><td><span class="status ro">Read-only</span> Physics form; writing any one selects it. Defaults 100, 10, 1</td></tr>
+<tr><td><code>velocity</code></td><td>Spring</td><td><span class="status ro">Read-only</span> Initial velocity in units per second; an array is per element</td></tr>
+<tr><td><code>power</code> <code>snap</code> <code>min</code> <code>max</code></td><td>Spring</td><td><span class="status ro">Read-only</span> Where a spring with no <code>to</code> settles. <code>min</code> and <code>max</code> also clamp an authored <code>to</code></td></tr>
 </table></div>
 <p class="rule-p"><a class="rule" id="motion.ops.exclusive" href="#motion.ops.exclusive">motion.ops.exclusive</a>Some properties are alternatives and must not be combined: <code>until</code> with <code>duration</code> on a <code>Wait</code>, and <code>points</code> with <code>shape</code>, or <code>duration</code> with <code>speed</code>, on a <code>Path</code>. If both of a pair are set, <code>until</code> wins over <code>duration</code>; <code>shape</code>, when it names any object, wins over <code>points</code>; and <code>speed</code> (or <code>drive</code> or <code>decay</code>) wins over <code>duration</code>, selecting speed mode. <span class="status nd">Not diagnosed</span></p>
 
@@ -1639,15 +1799,15 @@ Shape: car
 <p class="rule-p"><a class="rule" id="motion.path.times" href="#motion.path.times">motion.path.times</a><code>times</code> does not apply to a curved guide.</p>
 <div class="tablewrap"><table>
 <tr><th>Speed-mode property</th><th>Meaning</th></tr>
-<tr><td><code>speed</code></td><td>Cruise speed in px/s, or initial speed when <code>decay</code> is set. <code>speed</code>, <code>drive</code> and <code>decay</code> each select speed mode</td></tr>
-<tr><td><code>accel</code></td><td>Pixels from rest to cruise, shaped by <code>ease</code></td></tr>
-<tr><td><code>brake</code></td><td>Pixels of deceleration into the end, shaped by <code>ease</code> run backward. A route shorter than <code>accel + brake</code> never reaches cruise</td></tr>
-<tr><td><code>decay</code></td><td>Time constant in ms: speed decays exponentially and the target stops where it stops, or at the end of the route</td></tr>
-<tr><td><code>drive</code></td><td><code>[dx, dy]</code>: a pointer displacement projected onto the route, so a drag moves the target along the path only. Followed only while <code>held</code> is true</td></tr>
-<tr><td><code>held</code></td><td>While true, <code>drive</code> supplies the motion and the run never completes. When it turns false, a Path with <code>decay</code> coasts from the measured speed; without <code>decay</code> it continues at <code>speed</code>, or stops if there is none</td></tr>
-<tr><td><code>join</code></td><td><code>Join::Start</code> (default) heads for the first waypoint and runs the whole route; <code>Join::Nearest</code> heads for the nearest point on the route. Default <code>Nearest</code> when <code>drive</code> is set</td></tr>
-<tr><td><code>orient</code></td><td>A property to receive the heading in degrees; the target's art faces +X. Two-dimensional Paths only</td></tr>
-<tr><td><code>anchor</code></td><td>Which point of the target rides the path, as a fraction of its bounds. Default: the target's own <code>anchor</code></td></tr>
+<tr><td><code>speed</code></td><td><span class="status ro">Read-only</span> Cruise speed in px/s, or initial speed when <code>decay</code> is set. <code>speed</code>, <code>drive</code> and <code>decay</code> each select speed mode</td></tr>
+<tr><td><code>accel</code></td><td><span class="status ro">Read-only</span> Pixels from rest to cruise, shaped by <code>ease</code></td></tr>
+<tr><td><code>brake</code></td><td><span class="status ro">Read-only</span> Pixels of deceleration into the end, shaped by <code>ease</code> run backward. A route shorter than <code>accel + brake</code> never reaches cruise</td></tr>
+<tr><td><code>decay</code></td><td><span class="status ro">Read-only</span> Time constant in ms: speed decays exponentially and the target stops where it stops, or at the end of the route</td></tr>
+<tr><td><code>drive</code></td><td><span class="status ro">Read-only</span> <code>[dx, dy]</code>: a pointer displacement projected onto the route, so a drag moves the target along the path only. Followed only while <code>held</code> is true</td></tr>
+<tr><td><code>held</code></td><td><span class="status ro">Read-only</span> While true, <code>drive</code> supplies the motion and the run never completes. When it turns false, a Path with <code>decay</code> coasts from the measured speed; without <code>decay</code> it continues at <code>speed</code>, or stops if there is none</td></tr>
+<tr><td><code>join</code></td><td><span class="status ro">Read-only</span> <code>Join::Start</code> (default) heads for the first waypoint and runs the whole route; <code>Join::Nearest</code> heads for the nearest point on the route. Default <code>Nearest</code> when <code>drive</code> is set</td></tr>
+<tr><td><code>orient</code></td><td><span class="status ro">Read-only</span> A property to receive the heading in degrees; the target's art faces +X. Two-dimensional Paths only</td></tr>
+<tr><td><code>anchor</code></td><td><span class="status ro">Read-only</span> Which point of the target rides the path, as a fraction of its bounds. Default: the target's own <code>anchor</code></td></tr>
 </table></div>
 <p class="rule-p"><a class="rule" id="motion.path.anchor" href="#motion.path.anchor">motion.path.anchor</a>The route runs through the target's anchor point, which needs the target's bounds: give a Shape or Image on a Path a <code>width</code> and <code>height</code>. Author a draggable knob with its anchor point on its track and the first grab moves nothing.</p>
 <p class="rule-p"><a class="rule" id="motion.path.held" href="#motion.path.held">motion.path.held</a>Bind <code>held</code> to a Motion user property with a different name (<code>held: grip</code>); <code>held: held</code> reads the operation's own <code>held</code>.</p>
@@ -1754,7 +1914,7 @@ Image: photo
 <div class="tablewrap"><table>
 <tr><th>Name</th><th>Type</th><th>Value</th></tr>
 <tr><td><code>ALTIA_u_pmvMatrix</code></td><td>mat4</td><td>Canvas projection and view. Vertex stage: <code>gl_Position = (ALTIA_u_pmvMatrix * ALTIA_u_objXForm) * vec4(ALTIA_a_position, 0.0, 1.0)</code></td></tr>
-<tr><td><code>ALTIA_u_objXForm</code></td><td>mat4</td><td>The object's own transform (<code>xScale</code>, <code>yScale</code>, <code>rotate</code>, <code>anchor</code>, <code>corners</code>). Omit it and the object stops following its transform</td></tr>
+<tr><td><code>ALTIA_u_objXForm</code></td><td>mat4</td><td>The object's own transform (<code>scale</code>, <code>rotate</code>, <code>anchor</code>, <code>corners</code>). Omit it and the object stops following its transform</td></tr>
 <tr><td><code>ALTIA_u_colorFg</code></td><td>vec4</td><td>The viewable's <code>fg</code>; <code>.a</code> is its effective alpha (0–1, inherited alpha included)</td></tr>
 <tr><td><code>ALTIA_u_colorBg</code></td><td>vec4</td><td>The viewable's <code>bg</code></td></tr>
 <tr><td><code>ALTIA_u_pass</code></td><td>float</td><td>Vector: 1.0 on the fill pass, 0.0 on the outline or line pass. Text: 1.0 on the fill draw of a stroked font (<a href="#type.font.stroke">type.font.stroke</a>), otherwise 0.0</td></tr>
@@ -1850,7 +2010,7 @@ uniform sampler2D u_overlay;</code></pre>
 </table></div>
 <p class="rule-p"><a class="rule" id="mat.tex.upload" href="#mat.tex.upload">mat.tex.upload</a>Nothing is uploaded when a Texture is declared; it becomes a GL texture the first time a <code>MatVar</code> binds it.</p>
 <p class="rule-p"><a class="rule" id="mat.tex.shared" href="#mat.tex.shared">mat.tex.shared</a>Pictures are shared: a picture shown by an <code>Image</code> and sampled by a shader is one GL texture, and two Textures on one file with the same sampling are one texture. A different <code>filter</code>, <code>wrap</code> or <code>mipmap</code> gets its own copy.</p>
-<p class="rule-p"><a class="rule" id="mat.tex.buffer" href="#mat.tex.buffer">mat.tex.buffer</a>A buffered component is sampled as it redraws. An unbuffered component source is unresolved and samples black until it gains <code>buffer: true</code>; a buffer without <code>width</code>/<code>height</code> is a 1×1 texture. Blur output cannot be a texture source.</p>
+<p class="rule-p"><a class="rule" id="mat.tex.buffer" href="#mat.tex.buffer">mat.tex.buffer</a>A buffered component is sampled as it redraws. An unbuffered component source is unresolved and samples black until it gains <code>buffer: true</code>; the texture is the buffer's box (<a href="#view.effects.size">view.effects.size</a>). Blur output cannot be a texture source.</p>
 <p class="rule-p"><a class="rule" id="mat.tex.units" href="#mat.tex.units">mat.tex.units</a>User samplers start at texture unit 2; units 0 and 1 belong to <code>ALTIA_u_texture</code> and <code>ALTIA_u_texture2</code>.</p>
 <pre data-lang="abp"><code>Texture: overlay
   source: "res/icon_circle.png"
@@ -2021,9 +2181,11 @@ Scene: simple
 <p>ABP is not intended to express I/O, search or heavy computation. Those belong in the host application, which reaches the design in two ways: through <code>Data</code> properties, and through external functions the design calls.</p>
 
 <h2 id="host.data">The Data interface</h2>
-<p class="rule-p"><a class="rule" id="host.data.reach" href="#host.data.reach">host.data.reach</a>Through the runtime API a host reads, writes and watches <code>Data</code> properties by dotted path (<code>Vehicle.rpm</code>). Nothing other than <code>Data</code> properties is reachable.</p>
-<p class="rule-p"><a class="rule" id="host.data.write" href="#host.data.write">host.data.write</a>A host write is accepted only while the design is running, and only by a writable property authored as a literal or constant expression. A refused write reports its reason: <code>not running</code>, <code>read-only</code>, or <code>dynamic expression</code> for a bound property such as <code>speed: rpm / 30</code>. An accepted write propagates exactly like a <code>code:</code> write.</p>
-<p class="rule-p"><a class="rule" id="host.data.watch" href="#host.data.watch">host.data.watch</a>A watch reports changes to the property, whoever wrote them. Over the client API and the language server, changes are collected and sent once per frame, so a property written several times within one frame reports only its last value.</p>
+<p class="rule-p"><a class="rule" id="host.data.reach" href="#host.data.reach">host.data.reach</a>A host reads, writes and watches properties by dotted path (<code>Vehicle.rpm</code>). How far a path reaches depends on the API. In an application linking <code>HMI::API</code>, a path resolves <code>Data</code> properties only. Through the altia-blueprint-client library, against a design blueprint plays, a path resolves anything in the design: components and their properties as well as <code>Data</code>. Either API can walk the whole design from the root, child by child.</p>
+<p class="rule-p"><a class="rule" id="host.data.eval" href="#host.data.eval">host.data.eval</a>An expression evaluated as a string reaches any property in the design and may write it, as a <code>code:</code> action would. That includes <code>eval</code> through the client library, and the expression console, Evaluate Expression, the Debug Console, Watch and hover in Visual Studio Code. String evaluation is available only through blueprint: the language server and the client library. Embedded targets have none.</p>
+<p class="rule-p"><a class="rule" id="host.data.write" href="#host.data.write">host.data.write</a>A host write is accepted only while the design is running, and only by a writable property authored as a literal or constant expression. A refused write reports its reason: <code>not running</code>, <code>read-only</code>, or <code>dynamic expression</code> for a bound property such as <code>speed: rpm / 30</code>. An accepted write propagates exactly like a <code>code:</code> write. A whole array written to a declared array keeps the declared size (<a href="#decl.array.size">decl.array.size</a>), and the reply and the watchers carry the value kept, not the value sent. Through the client library the same rules apply to any property a path resolves, not only <code>Data</code>.</p>
+<p class="rule-p"><a class="rule" id="host.data.watch" href="#host.data.watch">host.data.watch</a>Only properties on <code>Data</code> objects trigger watch callbacks when they change. Over the client API and the language server, changes are collected and sent once per frame, so a property written several times within one frame reports only its last value.</p>
+<p class="rule-p"><a class="rule" id="host.data.frames" href="#host.data.frames">host.data.frames</a>A host write reaches the properties computed from it in the next frame. A host that writes a value and then reads a property computed from it must let the design process one frame first, plus one frame for each <code>@if</code> handler that the change passes through (<a href="#eval.handlers.frames">§7.1</a>).</p>
 
 <h2 id="host.ext">External functions</h2>
 <p class="rule-p"><a class="rule" id="host.ext.register" href="#host.ext.register">host.ext.register</a>A host makes a function callable as <code>ext.name(…)</code> by registering it under that name. An application registers functions with <code>HMI::API::registerFunction</code>, or through the altia-blueprint-client library. In Visual Studio Code, the Altia BluePrint extension loads a JavaScript module named <code>externals.js</code>, looked for first beside the entry document and then at the root of the workspace folder; each exported name is callable. The ABP is the same in every case.</p>
@@ -2055,7 +2217,7 @@ Shape: regreetBtn
       state.presses += 1
       state.greeting = ext.greet('press ' + state.presses)</code></pre>
 <p class="rule-p"><a class="rule" id="host.ext.unknown" href="#host.ext.unknown">host.ext.unknown</a>Which host answers a name is decided at call time, so a misspelled name is not an error anywhere; the call reads <code>undefined</code>. ABP names and host registrations must match exactly.</p>
-<p class="rule-p"><a class="rule" id="host.ext.sync" href="#host.ext.sync">host.ext.sync</a>Calls are synchronous and hold the frame while the host answers. Every call goes out to the host by name. A host outside the engine (the VS Code extension, or an application using the client library) has one second to answer; a call past that deadline reads <code>undefined</code>. An asynchronous implementation is still waited on.</p>
+<p class="rule-p"><a class="rule" id="host.ext.sync" href="#host.ext.sync">host.ext.sync</a>Calls are synchronous and hold the frame while the host answers. Every call goes out to the host by name. A host outside the engine (the VS Code extension, or an application using the client library) has one second to answer; a call past that deadline reads <code>undefined</code>. An asynchronous implementation is still waited on. An application using the client library is asked only while it waits on one of its own requests. When blueprint plays the design with <code>--wait-for-api</code>, that is every call: <code>@init</code> runs inside the application's <code>initialize()</code> and each frame inside its <code>process()</code>. On a design that runs on its own, a call made between the application's requests, such as one in an <code>@init</code> that ran before the application connected, is not sent to the application: it goes to <code>externals.js</code> when the design runs in VS Code, and otherwise reads <code>undefined</code>.</p>
 <p class="rule-p"><a class="rule" id="host.ext.slow" href="#host.ext.slow">host.ext.slow</a>For slow work, the call should start the work and return at once. The host then writes the result to a literal <code>Data</code> field that an <code>@if</code> handler watches; or, if the host only answers calls, a repeating <code>Timer</code> polls a second function for the result.</p>
 </section>
 
@@ -2080,14 +2242,15 @@ Shape: regreetBtn
 <h2 id="tool.play">Running and capturing</h2>
 <pre data-lang="sh"><code>.altia/tools/blueprint/blueprint --play main.abp                    # run in a window
 .altia/tools/blueprint/blueprint --play main.abp --capture shot.png # write the display to a PNG</code></pre>
-<p class="rule-p"><a class="rule" id="tool.play.errors" href="#tool.play.errors">tool.play.errors</a>A design with errors still plays.</p>
+<p class="rule-p"><a class="rule" id="tool.play.errors" href="#tool.play.errors">tool.play.errors</a>A design with errors still plays. A document with a syntax error contributes nothing, because <code>--play</code> reads each file once and has no earlier parse to keep (<a href="#doc.import.parse">doc.import.parse</a>). When that document is the entry, nothing is left to play: <code>--play</code> and <code>--capture</code> report the syntax error and exit with code <code>1</code>.</p>
 
 <h2 id="tool.inspect">Inspecting values</h2>
 <p>The <code>blueprint-lsp.js</code> helper in <code>.altia/tools/</code> evaluates expressions and reads data against a design without a language-server client:</p>
 <pre data-lang="sh"><code>node .altia/tools/blueprint-lsp.js eval main.abp "Vehicle.speed * 2"
 node .altia/tools/blueprint-lsp.js data main.abp Vehicle
 node .altia/tools/blueprint-lsp.js capture main.abp shot.png   # as authored, without running</code></pre>
-<p><code>eval</code> evaluates the expression at the design root and can read any property, not only <code>Data</code>. It answers <code>ok: false</code> for an expression whose chain names nothing, naming the segment that failed (<code>unresolved: veh.nope (at 'nope')</code>). In a <code>data</code> answer each requested path carries its own <code>ok</code>; a path that names no <code>Data</code> element answers <code>ok: false</code>, “not a data element”, without failing the others. <code>set</code> runs the design and writes one <code>Data</code> value, refusing a bound property with its reason. A property holding undefined answers <code>undefined</code>.</p>
+<p><code>eval</code> evaluates the expression at the design root and can read any property, not only <code>Data</code>. It answers <code>ok: false</code> for an expression whose chain names nothing, naming the segment that failed (<code>unresolved: veh.nope (at 'nope')</code>). It also refuses what a design load refuses with <code>expr.generate</code>, such as a call to an unknown function (<a href="#expr.call.kinds">expr.call.kinds</a>) or <code>===</code>, with the same message followed by the refused text: <code>Unknown or unsupported function call 'start(tick)'</code>. Such an expression is refused whole: nothing in it runs, not even a statement before the refused part, and a refused part in a branch that is not taken still refuses it. In a <code>data</code> answer each requested path carries its own <code>ok</code>; a path that names no <code>Data</code> element answers <code>ok: false</code>, “not a data element”, without failing the others. <code>set</code> runs the design and writes one <code>Data</code> value, refusing a bound property with its reason. A property holding undefined answers <code>undefined</code>.</p>
+<p class="rule-p"><a class="rule" id="tool.inspect.diff" href="#tool.inspect.diff">tool.inspect.diff</a>Two <code>eval</code> results differ from a design. <code>eval</code> reads <code>1.2.3</code>, which a design refuses (<code>expr.parse</code>), as a number near 0.3. String literals that <code>eval</code> writes inside an array read empty in the design afterward, although the answer shows them: an array written into a property not declared as an array (<code>D.x = ["a", "b"]</code>), an array written into one element of an array, and a string written into an element of a computed array (<code>items: [1, 2].concat([3])</code>, then <code>D.items[0] = "a"</code>). A plain string (<code>D.label = "a"</code>) and a whole array written into a property declared as an array (<code>D.tags = ["a", "b"]</code>) keep their text.</p>
 </section>
 
 <!-- ===================================================================== -->
@@ -2133,7 +2296,7 @@ node .altia/tools/blueprint-lsp.js capture main.abp shot.png   # as authored, wi
 <div class="tablewrap"><table>
 <tr><th>Enumeration</th><th>Values</th><th>Used by</th></tr>
 <tr><td><code>ShapeType</code></td><td class="wrap"><code>Rect</code>, <code>Line</code>, <code>Polyline</code>, <code>Ellipse</code>, <code>Polygon</code>, <code>Spline</code>, <code>ClosedSpline</code>, <code>Arc</code></td><td><code>Shape.kind</code></td></tr>
-<tr><td><code>Justify</code></td><td class="wrap"><code>Left</code>, <code>Right</code>, <code>Center</code>, <code>LeftSib</code></td><td><code>Text.justify</code></td></tr>
+<tr><td><code>Justify</code></td><td class="wrap"><code>None</code>, <code>Left</code>, <code>Right</code>, <code>Center</code></td><td><code>Text.justify</code></td></tr>
 <tr><td><code>Truncate</code></td><td class="wrap"><code>None</code>, <code>Clip</code>, <code>ElideEnd</code>, <code>ElideStart</code>, <code>ElideCenter</code>; reserved: <code>Page</code>, <code>Scale</code></td><td><code>Text.truncate</code></td></tr>
 <tr><td><code>Wrap</code></td><td class="wrap"><code>Normal</code>, <code>NewLineOnly</code></td><td><code>Text.wrapMode</code></td></tr>
 <tr><td><code>Align</code></td><td class="wrap"><code>Top</code>, <code>Center</code>, <code>Bottom</code> (no effect in this version)</td><td><code>Text.align</code></td></tr>
@@ -2165,8 +2328,8 @@ node .altia/tools/blueprint-lsp.js capture main.abp shot.png   # as authored, wi
 <div class="tablewrap"><table>
 <tr><th>Code</th><th>Reported when</th><th>See</th></tr>
 <tr><td><code>doc.parse</code></td><td>A document has a syntax error</td><td><a href="#lexical">§2</a></td></tr>
-<tr><td><code>import.parse</code></td><td>An <code>import:</code> line is malformed: it needs a quoted path, optionally followed by <code>-&gt; Alias</code></td><td><a href="#doc.imports">doc.imports</a></td></tr>
-<tr><td><code>import.unresolved</code></td><td>An import path cannot be resolved</td><td><a href="#doc.paths">doc.paths</a></td></tr>
+<tr><td><code>import.parse</code></td><td>An <code>import:</code> line is malformed: it needs a quoted path, optionally followed by <code>-&gt; Alias</code>, and nothing else; or its alias is not a type name</td><td><a href="#doc.imports">doc.imports</a></td></tr>
+<tr><td><code>import.unresolved</code></td><td>An import path cannot be resolved, or names a folder</td><td><a href="#doc.paths">doc.paths</a></td></tr>
 <tr><td><code>import.cycle</code></td><td>A module imports itself, directly or through other modules</td><td><a href="#doc.imports">doc.imports</a></td></tr>
 <tr><td><code>import.module-parse</code></td><td>An imported module has a syntax error; reported on the import line</td><td><a href="#doc.import.parse">doc.import.parse</a></td></tr>
 <tr><td><code>import.module-instance</code></td><td>A module declares top-level instances, which importers never create (warning)</td><td><a href="#doc.module.instances">doc.module.instances</a></td></tr>
@@ -2194,6 +2357,7 @@ node .altia/tools/blueprint-lsp.js capture main.abp shot.png   # as authored, wi
 <tr><td><code>expr.stamped-unresolved</code></td><td>A chain in a type body cannot be satisfied where the type is instantiated</td><td><a href="#scope.type.deferred">scope.type.deferred</a></td></tr>
 <tr><td><code>expr.side-effects</code></td><td>A write, action call or external call appears outside a <code>code:</code> action</td><td><a href="#eval.writes.rule">eval.writes.rule</a></td></tr>
 <tr><td><code>expr.cycle</code></td><td>A property depends on itself through a chain of references; it evaluates to <code>undefined</code></td><td><a href="#eval.reactive">eval.reactive</a></td></tr>
+<tr><td><code>expr.read-only-write</code></td><td>A <code>code:</code> write targets a read-only property, such as a Timer's <code>active</code> or a Motion's <code>running</code>, or <code>parent</code>; the write is ignored (warning)</td><td><a href="#eval.writes.readonly">eval.writes.readonly</a></td></tr>
 <tr><td><code>shape.rect-vertex-radius</code></td><td>A <code>Rect</code> point carries a per-vertex radius (warning)</td><td><a href="#type.shape.rectradius">type.shape.rectradius</a></td></tr>
 </table></div>
 
@@ -2207,12 +2371,13 @@ node .altia/tools/blueprint-lsp.js capture main.abp shot.png   # as authored, wi
 <tr><td>A domain prefix such as <code>data.</code></td><td>Resolves against the first top-level object of that kind</td><td><a href="#scope.res.byname">scope.res.byname</a></td></tr>
 <tr><td>An <code>@if</code> with no condition</td><td>Never fires</td><td><a href="#ev.if.cond">ev.if.cond</a></td></tr>
 <tr><td>Any rule marked <span class="status nd">Not diagnosed</span></td><td>Accepted; the design may not behave as intended</td><td>The rule itself</td></tr>
-<tr><td>A Motion driving an undeclared property</td><td>Writes nothing</td><td><a href="#motion.target.declared">motion.target.declared</a></td></tr>
+<tr><td>A Motion driving an undeclared property</td><td>Writes nothing; the run logs a warning when it starts</td><td><a href="#motion.target.declared">motion.target.declared</a></td></tr>
+<tr><td>A child named after a property that holds an instance (<code>ref.label.text</code>)</td><td>Reads <code>undefined</code>; a write changes nothing</td><td><a href="#decl.children.viaprop">decl.children.viaprop</a></td></tr>
 <tr><td>An operation property its operation does not use</td><td>Ignored</td><td><a href="#motion.ops.props">motion.ops.props</a></td></tr>
 <tr><td>A malformed or out-of-range layout value</td><td>Previous value stands</td><td><a href="#layout.reject">layout.reject</a></td></tr>
+<tr><td>An auto margin on the cross axis beside <code>alignItems: FlexAlign::Stretch</code></td><td>The item is not laid out</td><td><a href="#layout.margin.auto">layout.margin.auto</a></td></tr>
 <tr><td>An unknown <code>ext.*</code> name</td><td>Reads <code>undefined</code> at run time</td><td><a href="#host.ext.unknown">host.ext.unknown</a></td></tr>
 <tr><td>A <code>MatVar</code> outside a <code>Material</code></td><td>Does nothing</td><td><a href="#mat.matvar.unused">mat.matvar.unused</a></td></tr>
-<tr><td><code>buffer</code> or <code>blur</code> without <code>width</code>/<code>height</code></td><td>Draws nothing</td><td><a href="#view.buffer.size">view.buffer.size</a></td></tr>
 <tr><td><code>visible: false</code> on a mask source</td><td>Masks out everything</td><td><a href="#view.mask.hide">view.mask.hide</a></td></tr>
 </table></div>
 </section>
@@ -2279,7 +2444,7 @@ Image: face
     height: 300
     anchor: [0.5, 0.5]
     rotate: 135 - Vehicle.rpm / 8000 * 270</code></pre>
-<p>The needle art is the same size as the face and points straight up, so placing it at <code>x: 0</code>, <code>y: 0</code> lines the two pictures up and the center anchor is the dial's pivot. An <code>Image</code> honors <code>anchor</code> only when its <code>width</code> and <code>height</code> are set (<a href="#type.image.anchor">type.image.anchor</a>). Positive rotation is counterclockwise, so the angle starts at 135° (pointing down and to the left at 0 rpm) and decreases, sweeping the needle clockwise through 270° to −135° at 8000 rpm.</p>
+<p>The needle art is the same size as the face and points straight up, so placing it at <code>x: 0</code>, <code>y: 0</code> lines the two pictures up and the center anchor is the dial's pivot. Positive rotation is counterclockwise, so the angle starts at 135° (pointing down and to the left at 0 rpm) and decreases, sweeping the needle clockwise through 270° to −135° at 8000 rpm.</p>
 
 <h2 id="recipe.imagery">State-dependent imagery</h2>
 <pre data-lang="abp"><code>Data: App
@@ -2313,7 +2478,7 @@ Component: fuelBar
     y: 0
     width: 200
     height: 24</code></pre>
-<p>For an arc gauge, rotate the stencil instead: author a square wedge image whose pivot is its center, place that center on the dial pivot, give the Image its <code>width</code> and <code>height</code> so it turns about that center (<a href="#type.image.anchor">type.image.anchor</a>), and bind <code>rotate</code>. Keep the stencil and the masked component under the same parent so the overlap arithmetic stays readable; the stencil is positioned in its own parent's frame.</p>
+<p>For an arc gauge, rotate the stencil instead: author a square wedge image whose pivot is its center, place that center on the dial pivot so it turns about that center, and bind <code>rotate</code>. Keep the stencil and the masked component under the same parent so the overlap arithmetic stays readable; the stencil is positioned in its own parent's frame.</p>
 
 <h2 id="recipe.reveal">Animated show/hide driven by state</h2>
 <pre data-lang="abp"><code>Data: nav
@@ -2372,16 +2537,13 @@ Shape: switcher
   bg: "#5FB0FF"
   @click:
     code: nav.tab = nav.tab == 0 ? 1 : 0</code></pre>
-<p>Each page watches state with <code>@if</code> and starts the Motion on itself, and <code>@init</code> covers the starting state, which <code>@if</code> does not fire for (<a href="#ev.if.initial">ev.if.initial</a>). Because <code>to</code> is read when the Step starts and <code>from</code> defaults to the current value, switching pages mid-transition continues smoothly from wherever each property is now. Visibility and input follow the animated alpha, so the hidden page cannot be clicked.</p>
+<p>Each page watches state with <code>@if</code> and starts the Motion on itself, and <code>@init</code> covers the starting state, which <code>@if</code> does not fire for (<a href="#ev.if.initial">ev.if.initial</a>). Because <code>to</code> is read when the Step starts and <code>from</code> defaults to the current value, switching pages mid-transition continues smoothly from wherever each property is now. Visibility and input follow the animated alpha: at 0 the page is hidden and disabled, so it cannot be clicked. The bindings are what do it; <code>alpha</code> alone does not stop input (<a href="#ev.pointer.overlap">ev.pointer.overlap</a>).</p>
 
 <h2 id="recipe.wipe">Wipe by animating the clip window</h2>
-<pre data-lang="abp"><code>Data: reveal
-  w: 0
-
-Motion: $Wipe
+<pre data-lang="abp"><code>Motion: $Wipe
   Step:
     Tween:
-      out: reveal.w
+      out: target.clipRect[2]
       to: 200
       duration: 400
       ease: Ease::OutCubic
@@ -2392,14 +2554,14 @@ Component: card
   width: 200
   height: 100
   clip: true
-  clipRect: [0, 0, reveal.w, 100]
+  clipRect: [0, 0, 0, 100]
   @init:
     start: wipe
   Image: art
     img: "res/card.png"
     width: 200
     height: 100</code></pre>
-<p>A Motion cannot drive one array element, so it tweens a scalar that the <code>clipRect</code> element reads. Wipe from the right with <code>clipRect: [200 - reveal.w, 0, reveal.w, 100]</code>. To wipe vertically, animate the fourth value instead, from its own <code>Data</code> field tweened to the card's height, 100; because +Y is up, the card is revealed from the bottom up.</p>
+<p>The Tween drives the window's width, the third element, from nothing to the full card (<a href="#motion.target.element">motion.target.element</a>). To wipe vertically, drive the fourth element, <code>target.clipRect[3]</code>, to the card's height, 100; because +Y is up, the card is revealed from the bottom up. To wipe from the right, two elements move together: tween a <code>Data</code> value <code>reveal.w</code> and write <code>clipRect: [200 - reveal.w, 0, reveal.w, 100]</code>.</p>
 
 <h2 id="recipe.modules">Shared modules</h2>
 <pre data-lang="abp"><code># imports/theme.abp -- types only
@@ -2447,7 +2609,7 @@ Heading: title
 </dl>
 </section>
 
-    <footer class="end"><img src="assets/altia-logo.png" alt="Altia"><span>Altia BluePrint Language Reference · Beta · Extension 0.9.1 · October 2026</span></footer>
+    <footer class="end"><img src="assets/altia-logo.png" alt="Altia"><span>Altia BluePrint Language Reference · Extension 1.0.0 · October 2026</span></footer>
   </main>
 </div>
 </div>
